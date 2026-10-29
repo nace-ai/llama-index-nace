@@ -4,10 +4,8 @@ LlamaIndex selectors backed by Drex decision models from [Nace](https://nace.ai)
 
 ## Install
 
-Coming soon to PyPI (`pip install llama-index-selectors-nace`). Install from source meanwhile:
-
 ```
-pip install "git+https://github.com/nace-ai/llama-index-nace#subdirectory=packages/llama-index-selectors-nace"
+pip install llama-index-selectors-nace
 ```
 
 Set `NACE_API_KEY`. Optional: `NACE_BASE_URL`, `NACE_DEFAULT_DECISION_MODEL`. For OpenRouter pass `base_url="https://openrouter.ai/api/v1"`.

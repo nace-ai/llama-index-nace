@@ -11,12 +11,11 @@ Evaluators: Drex gives each judgement as a probability, and Drex Max reads image
 
 ## Install
 
-Coming soon to PyPI. Install from source meanwhile:
+```
+pip install llama-index-evaluation-nace llama-index-selectors-nace
+```
 
-```
-pip install "git+https://github.com/nace-ai/llama-index-nace#subdirectory=packages/llama-index-evaluation-nace"
-pip install "git+https://github.com/nace-ai/llama-index-nace#subdirectory=packages/llama-index-selectors-nace"
-```
+Each package installs on its own too.
 
 Set `NACE_API_KEY`. The default model is `drex-max-v1.1` (text and images; `nace-ai/drex-max` on OpenRouter, which doesn't list v1.1 yet); pass `model=` or set `NACE_DEFAULT_DECISION_MODEL` to use another, such as `drex-v2.0`.
 

@@ -1,0 +1,18 @@
+{
+  "task": "faithfulness",
+  "system": "drex",
+  "model": "drex-v2.0",
+  "n": 500,
+  "n_errors": 0,
+  "accuracy": 0.82,
+  "balanced_accuracy": 0.82,
+  "roc_auc": 0.922096,
+  "usd_per_1k": 0.01127832,
+  "usd_total": 0.00563916,
+  "input_tokens_mean": 187.972,
+  "output_tokens_mean": 21.884,
+  "p50_ms": 479.827770999691,
+  "p95_ms": 836.9051774039696,
+  "date": "2026-10-28",
+  "error_samples": []
+}

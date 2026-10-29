@@ -1,0 +1,18 @@
+{
+  "task": "faithfulness-matched",
+  "system": "length-rule",
+  "model": "none (no API calls)",
+  "n": 500,
+  "n_errors": 0,
+  "accuracy": 0.546,
+  "balanced_accuracy": 0.546,
+  "roc_auc": null,
+  "usd_per_1k": 0.0,
+  "usd_total": 0.0,
+  "input_tokens_mean": 0.0,
+  "output_tokens_mean": 0.0,
+  "p50_ms": null,
+  "p95_ms": null,
+  "date": "2026-10-28",
+  "error_samples": []
+}

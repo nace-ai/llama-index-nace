@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [llama-index-selectors-nace, llama-index-evaluation-nace]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv sync --all-packages --all-groups
+      - run: uv run ruff check packages/${{ matrix.package }} scripts
+      - run: uv run ruff format --check packages/${{ matrix.package }} scripts
+      - run: uv run mypy
+      - run: uv run python scripts/check_drex_sync.py
+      - run: >
+          uv run pytest packages/${{ matrix.package }}/tests
+          --rootdir packages/${{ matrix.package }}
+          --cov --cov-config packages/${{ matrix.package }}/pyproject.toml
+      - run: uv build --package ${{ matrix.package }}

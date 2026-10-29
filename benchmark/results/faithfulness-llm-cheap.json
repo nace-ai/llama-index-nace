@@ -1,0 +1,18 @@
+{
+  "task": "faithfulness",
+  "system": "llm-cheap",
+  "model": "gpt-5.4-nano",
+  "n": 500,
+  "n_errors": 0,
+  "accuracy": 0.678,
+  "balanced_accuracy": 0.6779999999999999,
+  "roc_auc": null,
+  "usd_per_1k": 0.0709072,
+  "usd_total": 0.0354536,
+  "input_tokens_mean": 329.536,
+  "output_tokens_mean": 4.0,
+  "p50_ms": 882.6487289989018,
+  "p95_ms": 1362.57604104394,
+  "date": "2026-10-28",
+  "error_samples": []
+}

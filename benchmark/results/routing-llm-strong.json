@@ -1,0 +1,18 @@
+{
+  "task": "routing",
+  "system": "llm-strong",
+  "model": "claude-sonnet-5-5",
+  "n": 320,
+  "n_errors": 0,
+  "accuracy": 0.978125,
+  "balanced_accuracy": null,
+  "roc_auc": null,
+  "usd_per_1k": 1.6910874999999999,
+  "usd_total": 0.541148,
+  "input_tokens_mean": 352.16875,
+  "output_tokens_mean": 98.675,
+  "p50_ms": 1671.7797289966256,
+  "p95_ms": 2783.5833586483204,
+  "date": "2026-10-28",
+  "error_samples": []
+}

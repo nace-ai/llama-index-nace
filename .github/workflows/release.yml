@@ -1,0 +1,80 @@
+name: Release
+
+# Tag selectors-v<version>   -> build and publish llama-index-selectors-nace
+# Tag evaluation-v<version>  -> build and publish llama-index-evaluation-nace
+# Publishing uses PyPI trusted publishing (no token). Each PyPI project must list this
+# repository, workflow (release.yml) and environment (pypi) as a trusted publisher.
+
+on:
+  push:
+    tags:
+      - "selectors-v*"
+      - "evaluation-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.pkg.outputs.package }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Pick the package from the tag and check its version
+        id: pkg
+        run: |
+          case "$GITHUB_REF_NAME" in
+            selectors-v*)
+              package=llama-index-selectors-nace
+              version_file=packages/llama-index-selectors-nace/llama_index/selectors/nace/_version.py
+              tag_version="${GITHUB_REF_NAME#selectors-v}"
+              ;;
+            evaluation-v*)
+              package=llama-index-evaluation-nace
+              version_file=packages/llama-index-evaluation-nace/llama_index/evaluation/nace/_version.py
+              tag_version="${GITHUB_REF_NAME#evaluation-v}"
+              ;;
+            *)
+              echo "Unexpected tag $GITHUB_REF_NAME" >&2
+              exit 1
+              ;;
+          esac
+          file_version=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' "$version_file")
+          if [ "$tag_version" != "$file_version" ]; then
+            echo "Tag version $tag_version does not match $version_file ($file_version)" >&2
+            exit 1
+          fi
+          echo "package=$package" >> "$GITHUB_OUTPUT"
+      - run: uv build --package "${{ steps.pkg.outputs.package }}" --out-dir dist
+      - name: Wheel must not contain namespace __init__ files
+        run: |
+          for whl in dist/*.whl; do
+            for f in llama_index/__init__.py llama_index/selectors/__init__.py llama_index/evaluation/__init__.py; do
+              if unzip -l "$whl" | grep -q " $f\$"; then
+                echo "$whl contains $f" >&2
+                exit 1
+              fi
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

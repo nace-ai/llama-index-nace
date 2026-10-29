@@ -1,0 +1,500 @@
+{"id": "1864-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 627, "output_tokens": 4, "latency_ms": 1283.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2160-right", "label": true, "pred": true, "score": null, "input_tokens": 484, "output_tokens": 4, "latency_ms": 1441.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7038-right", "label": true, "pred": true, "score": null, "input_tokens": 534, "output_tokens": 4, "latency_ms": 1340.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1705-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 601, "output_tokens": 143, "latency_ms": 2567.5, "calls": 1, "feedback": "The context mentions lenticular galaxies, but only in passing. It says elliptica", "error": null}
+{"id": "9447-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 493, "output_tokens": 4, "latency_ms": 1171.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3041-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 512, "output_tokens": 4, "latency_ms": 1263.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7038-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 535, "output_tokens": 76, "latency_ms": 1709.9, "calls": 1, "feedback": "NO\n\nThe context covers Fresnel zones, which concern the space between a transmit", "error": null}
+{"id": "9694-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 540, "output_tokens": 4, "latency_ms": 1207.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6734-right", "label": true, "pred": true, "score": null, "input_tokens": 474, "output_tokens": 4, "latency_ms": 1833.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2160-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 487, "output_tokens": 88, "latency_ms": 1561.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7437-right", "label": true, "pred": true, "score": null, "input_tokens": 580, "output_tokens": 4, "latency_ms": 1068.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7720-right", "label": true, "pred": true, "score": null, "input_tokens": 621, "output_tokens": 4, "latency_ms": 1803.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1205-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 534, "output_tokens": 4, "latency_ms": 1070.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "891-right", "label": true, "pred": true, "score": null, "input_tokens": 478, "output_tokens": 4, "latency_ms": 1483.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5582-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 529, "output_tokens": 4, "latency_ms": 975.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2388-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 503, "output_tokens": 256, "latency_ms": 2979.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9114-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 539, "output_tokens": 4, "latency_ms": 920.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "951-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 575, "output_tokens": 251, "latency_ms": 2308.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9719-right", "label": true, "pred": true, "score": null, "input_tokens": 486, "output_tokens": 4, "latency_ms": 1005.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "720-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 502, "output_tokens": 4, "latency_ms": 1011.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7800-right", "label": true, "pred": true, "score": null, "input_tokens": 495, "output_tokens": 4, "latency_ms": 929.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6239-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 644, "output_tokens": 4, "latency_ms": 1048.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8693-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 548, "output_tokens": 54, "latency_ms": 1717.2, "calls": 1, "feedback": "NO\n\nThe context names the singer as Kiri Te Kanawa, not \"Karen Te Kanawa\". The g", "error": null}
+{"id": "7690-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 529, "output_tokens": 84, "latency_ms": 1285.2, "calls": 1, "feedback": "NO\n\nThe context describes Showdown in Chinatown as an annual charity soccer matc", "error": null}
+{"id": "6239-right", "label": true, "pred": true, "score": null, "input_tokens": 639, "output_tokens": 4, "latency_ms": 962.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4733-right", "label": true, "pred": true, "score": null, "input_tokens": 534, "output_tokens": 4, "latency_ms": 1443.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9795-right", "label": true, "pred": true, "score": null, "input_tokens": 491, "output_tokens": 4, "latency_ms": 1876.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1764-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 524, "output_tokens": 4, "latency_ms": 983.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1596-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 467, "output_tokens": 4, "latency_ms": 1432.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2482-right", "label": true, "pred": true, "score": null, "input_tokens": 623, "output_tokens": 4, "latency_ms": 980.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "859-right", "label": true, "pred": true, "score": null, "input_tokens": 533, "output_tokens": 4, "latency_ms": 1039.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3801-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 508, "output_tokens": 59, "latency_ms": 1379.8, "calls": 1, "feedback": "YES\n\nThe context says Dye offered his expertise to \"The Pacific,\" and that The P", "error": null}
+{"id": "8723-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 634, "output_tokens": 4, "latency_ms": 1216.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "936-right", "label": true, "pred": true, "score": null, "input_tokens": 484, "output_tokens": 4, "latency_ms": 1025.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5994-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 496, "output_tokens": 4, "latency_ms": 938.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2585-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 497, "output_tokens": 4, "latency_ms": 1670.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "696-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 591, "output_tokens": 51, "latency_ms": 1667.2, "calls": 1, "feedback": "NO\n\nThe context mentions \"The Day After,\" a different TV film from 1983, not \"Th", "error": null}
+{"id": "9767-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 564, "output_tokens": 4, "latency_ms": 1121.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5917-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 542, "output_tokens": 4, "latency_ms": 1756.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4559-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 576, "output_tokens": 4, "latency_ms": 1047.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6101-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 531, "output_tokens": 4, "latency_ms": 1606.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1422-right", "label": true, "pred": true, "score": null, "input_tokens": 625, "output_tokens": 4, "latency_ms": 1135.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2018-right", "label": true, "pred": true, "score": null, "input_tokens": 531, "output_tokens": 4, "latency_ms": 1665.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8723-right", "label": true, "pred": true, "score": null, "input_tokens": 635, "output_tokens": 4, "latency_ms": 1354.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1705-right", "label": true, "pred": true, "score": null, "input_tokens": 600, "output_tokens": 4, "latency_ms": 1858.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7232-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 603, "output_tokens": 54, "latency_ms": 1320.3, "calls": 1, "feedback": "NO\n\nThe context gives the nickname \"The Magic Mile\" for New Hampshire Motor Spee", "error": null}
+{"id": "2217-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 486, "output_tokens": 145, "latency_ms": 2016.0, "calls": 1, "feedback": "The information \"Department of Revenue Rulings\" is a fragment, not a full claim.", "error": null}
+{"id": "8880-right", "label": true, "pred": true, "score": null, "input_tokens": 506, "output_tokens": 46, "latency_ms": 1426.0, "calls": 1, "feedback": "YES. The context mentions \"John Lennon/Plastic Ono Band\" as the critically accla", "error": null}
+{"id": "9114-right", "label": true, "pred": true, "score": null, "input_tokens": 541, "output_tokens": 4, "latency_ms": 1027.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "316-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 448, "output_tokens": 57, "latency_ms": 2074.7, "calls": 1, "feedback": "NO\n\nThe context says Trevor Prangley competed in the Middleweight and Light Heav", "error": null}
+{"id": "6381-right", "label": true, "pred": true, "score": null, "input_tokens": 535, "output_tokens": 4, "latency_ms": 1109.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3486-right", "label": true, "pred": true, "score": null, "input_tokens": 596, "output_tokens": 4, "latency_ms": 1133.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2829-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 508, "output_tokens": 4, "latency_ms": 985.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5753-right", "label": true, "pred": true, "score": null, "input_tokens": 515, "output_tokens": 4, "latency_ms": 1160.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6357-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 490, "output_tokens": 202, "latency_ms": 3207.5, "calls": 1, "feedback": "NO\n\nThe context says the fort (Fort Gorges) became obsolete because of advancing", "error": null}
+{"id": "4019-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 542, "output_tokens": 49, "latency_ms": 1912.4, "calls": 1, "feedback": "Weber was born in 1786 and Gounod in 1818, so Gounod was born after Weber, not b", "error": null}
+{"id": "3092-right", "label": true, "pred": true, "score": null, "input_tokens": 544, "output_tokens": 4, "latency_ms": 1029.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7106-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 510, "output_tokens": 70, "latency_ms": 2253.8, "calls": 1, "feedback": "NO\n\nThe context mentions The Dome at America's Center, a multi-purpose stadium i", "error": null}
+{"id": "3557-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 521, "output_tokens": 4, "latency_ms": 1613.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2343-right", "label": true, "pred": true, "score": null, "input_tokens": 692, "output_tokens": 4, "latency_ms": 2212.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6224-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 519, "output_tokens": 4, "latency_ms": 1106.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5069-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 460, "output_tokens": 63, "latency_ms": 1259.1, "calls": 1, "feedback": "NO\n\nThe context says she was an administrator and de facto regent of India, and ", "error": null}
+{"id": "2118-right", "label": true, "pred": true, "score": null, "input_tokens": 536, "output_tokens": 4, "latency_ms": 1015.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3172-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 510, "output_tokens": 4, "latency_ms": 1201.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6130-right", "label": true, "pred": true, "score": null, "input_tokens": 537, "output_tokens": 4, "latency_ms": 945.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7323-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 464, "output_tokens": 4, "latency_ms": 1037.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2941-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 530, "output_tokens": 48, "latency_ms": 1626.4, "calls": 1, "feedback": "NO\n\nThe context mentions Westfield Parramatta and Westfield Doncaster, but it ne", "error": null}
+{"id": "232-right", "label": true, "pred": true, "score": null, "input_tokens": 568, "output_tokens": 4, "latency_ms": 1434.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1938-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 509, "output_tokens": 4, "latency_ms": 994.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6287-right", "label": true, "pred": true, "score": null, "input_tokens": 449, "output_tokens": 4, "latency_ms": 1714.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2502-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 494, "output_tokens": 4, "latency_ms": 990.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5657-right", "label": true, "pred": true, "score": null, "input_tokens": 510, "output_tokens": 4, "latency_ms": 959.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2056-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 539, "output_tokens": 4, "latency_ms": 1109.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2211-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 647, "output_tokens": 4, "latency_ms": 1176.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8474-right", "label": true, "pred": true, "score": null, "input_tokens": 542, "output_tokens": 4, "latency_ms": 1385.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1939-right", "label": true, "pred": true, "score": null, "input_tokens": 566, "output_tokens": 4, "latency_ms": 1016.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1398-right", "label": true, "pred": true, "score": null, "input_tokens": 488, "output_tokens": 4, "latency_ms": 996.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4562-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 613, "output_tokens": 4, "latency_ms": 1017.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8898-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 527, "output_tokens": 4, "latency_ms": 1062.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9591-right", "label": true, "pred": true, "score": null, "input_tokens": 573, "output_tokens": 4, "latency_ms": 1041.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7225-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 488, "output_tokens": 4, "latency_ms": 1003.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2920-right", "label": true, "pred": true, "score": null, "input_tokens": 548, "output_tokens": 4, "latency_ms": 1330.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "720-right", "label": true, "pred": true, "score": null, "input_tokens": 506, "output_tokens": 4, "latency_ms": 1039.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3995-right", "label": true, "pred": true, "score": null, "input_tokens": 478, "output_tokens": 4, "latency_ms": 1203.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7429-right", "label": true, "pred": true, "score": null, "input_tokens": 611, "output_tokens": 4, "latency_ms": 964.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7092-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 492, "output_tokens": 4, "latency_ms": 1764.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2261-right", "label": true, "pred": true, "score": null, "input_tokens": 547, "output_tokens": 4, "latency_ms": 1584.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "326-right", "label": true, "pred": true, "score": null, "input_tokens": 480, "output_tokens": 4, "latency_ms": 2167.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8955-right", "label": true, "pred": true, "score": null, "input_tokens": 597, "output_tokens": 4, "latency_ms": 1136.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1596-right", "label": true, "pred": true, "score": null, "input_tokens": 465, "output_tokens": 62, "latency_ms": 1291.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7918-right", "label": true, "pred": true, "score": null, "input_tokens": 675, "output_tokens": 4, "latency_ms": 1907.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7225-right", "label": true, "pred": true, "score": null, "input_tokens": 486, "output_tokens": 4, "latency_ms": 2415.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3927-right", "label": true, "pred": true, "score": null, "input_tokens": 585, "output_tokens": 137, "latency_ms": 2368.5, "calls": 1, "feedback": "The information is just \"the world.\" The context says the French Grand Prix is \"", "error": null}
+{"id": "3248-right", "label": true, "pred": true, "score": null, "input_tokens": 487, "output_tokens": 4, "latency_ms": 1031.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7800-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 499, "output_tokens": 4, "latency_ms": 956.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6363-right", "label": true, "pred": true, "score": null, "input_tokens": 514, "output_tokens": 4, "latency_ms": 880.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7092-right", "label": true, "pred": true, "score": null, "input_tokens": 493, "output_tokens": 4, "latency_ms": 1262.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3348-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 569, "output_tokens": 4, "latency_ms": 1032.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7993-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 517, "output_tokens": 4, "latency_ms": 2568.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5472-right", "label": true, "pred": true, "score": null, "input_tokens": 528, "output_tokens": 4, "latency_ms": 998.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3465-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 563, "output_tokens": 109, "latency_ms": 1656.8, "calls": 1, "feedback": "NO\n\nThe context says CNN, BBC, and Fox News reported on Neda's shooting, and tha", "error": null}
+{"id": "1014-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 533, "output_tokens": 48, "latency_ms": 1362.8, "calls": 1, "feedback": "NO\n\nThe context mentions \"The Book of Life,\" a 2014 animated film, but never \"Th", "error": null}
+{"id": "9900-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 482, "output_tokens": 4, "latency_ms": 1018.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8955-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 600, "output_tokens": 53, "latency_ms": 1651.9, "calls": 1, "feedback": "NO\n\nThe context mentions only the Academy Award for Best Supporting Actress. It ", "error": null}
+{"id": "7519-right", "label": true, "pred": true, "score": null, "input_tokens": 552, "output_tokens": 4, "latency_ms": 1136.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2293-right", "label": true, "pred": true, "score": null, "input_tokens": 510, "output_tokens": 4, "latency_ms": 1631.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "611-right", "label": true, "pred": true, "score": null, "input_tokens": 480, "output_tokens": 4, "latency_ms": 1002.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "66-right", "label": true, "pred": true, "score": null, "input_tokens": 568, "output_tokens": 4, "latency_ms": 1586.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1764-right", "label": true, "pred": true, "score": null, "input_tokens": 521, "output_tokens": 45, "latency_ms": 1205.3, "calls": 1, "feedback": "YES\n\nThe context describes Conor Cruise O'Brien as \"an Irish politician, writer,", "error": null}
+{"id": "195-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 517, "output_tokens": 61, "latency_ms": 2370.8, "calls": 1, "feedback": "NO\n\nThe context covers St James Street in Monmouth, the 1610 Speed map, and John", "error": null}
+{"id": "8660-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 511, "output_tokens": 4, "latency_ms": 1601.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6678-right", "label": true, "pred": true, "score": null, "input_tokens": 476, "output_tokens": 4, "latency_ms": 985.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3516-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 666, "output_tokens": 4, "latency_ms": 1059.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8942-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 478, "output_tokens": 38, "latency_ms": 2378.0, "calls": 1, "feedback": "NO\n\nThe context never mentions Stephen Meyer. It names only Michael Behe, so it ", "error": null}
+{"id": "1694-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 497, "output_tokens": 4, "latency_ms": 1491.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5721-right", "label": true, "pred": true, "score": null, "input_tokens": 558, "output_tokens": 46, "latency_ms": 1224.5, "calls": 1, "feedback": "YES\n\nThe context says Drive Angry, a film Campbell appeared in, was directed by ", "error": null}
+{"id": "4034-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 489, "output_tokens": 4, "latency_ms": 1025.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5917-right", "label": true, "pred": true, "score": null, "input_tokens": 540, "output_tokens": 47, "latency_ms": 1373.4, "calls": 1, "feedback": "YES\n\nThe context says Scott Pilgrim, the series' protagonist, \"lives in Toronto,", "error": null}
+{"id": "4902-right", "label": true, "pred": true, "score": null, "input_tokens": 602, "output_tokens": 4, "latency_ms": 1053.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7282-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 517, "output_tokens": 75, "latency_ms": 1680.9, "calls": 1, "feedback": "NO\n\nThe context describes 55 Hudson Yards as a \"future tower,\" so it had not bee", "error": null}
+{"id": "8715-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 534, "output_tokens": 4, "latency_ms": 1365.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7735-right", "label": true, "pred": true, "score": null, "input_tokens": 493, "output_tokens": 4, "latency_ms": 1447.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7815-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 495, "output_tokens": 52, "latency_ms": 1348.6, "calls": 1, "feedback": "NO\n\nThe context gives March 1995 as the release date of \"Poison\" and July 1994 a", "error": null}
+{"id": "8617-right", "label": true, "pred": true, "score": null, "input_tokens": 508, "output_tokens": 4, "latency_ms": 1499.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8833-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 552, "output_tokens": 4, "latency_ms": 917.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "115-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 490, "output_tokens": 50, "latency_ms": 1408.5, "calls": 1, "feedback": "NO\n\nThe context never mentions \"The Executioner's Justice.\" It only lists film r", "error": null}
+{"id": "9447-right", "label": true, "pred": true, "score": null, "input_tokens": 485, "output_tokens": 4, "latency_ms": 927.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1398-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 492, "output_tokens": 63, "latency_ms": 1480.1, "calls": 1, "feedback": "NO\n\nThe context describes Jason Eady as a figure in Texas country music, with in", "error": null}
+{"id": "3013-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 558, "output_tokens": 4, "latency_ms": 1506.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7716-right", "label": true, "pred": true, "score": null, "input_tokens": 576, "output_tokens": 43, "latency_ms": 1574.5, "calls": 1, "feedback": "YES\n\nThe context says Blood Diamond stars Leonardo DiCaprio, so he is mentioned ", "error": null}
+{"id": "7306-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 574, "output_tokens": 4, "latency_ms": 1209.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2217-right", "label": true, "pred": true, "score": null, "input_tokens": 484, "output_tokens": 4, "latency_ms": 1114.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5558-right", "label": true, "pred": true, "score": null, "input_tokens": 550, "output_tokens": 4, "latency_ms": 1948.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4981-right", "label": true, "pred": true, "score": null, "input_tokens": 526, "output_tokens": 89, "latency_ms": 1508.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7953-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 601, "output_tokens": 47, "latency_ms": 1936.7, "calls": 1, "feedback": "NO\n\nThe context mentions HK$ 100 million as Yip Hon's estimated wealth. It never", "error": null}
+{"id": "5808-right", "label": true, "pred": true, "score": null, "input_tokens": 471, "output_tokens": 62, "latency_ms": 1601.4, "calls": 1, "feedback": "YES\n\nThe context says Fred Guiol was an American film director and screenwriter.", "error": null}
+{"id": "3925-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 510, "output_tokens": 4, "latency_ms": 1217.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8715-right", "label": true, "pred": true, "score": null, "input_tokens": 530, "output_tokens": 4, "latency_ms": 1198.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3426-right", "label": true, "pred": true, "score": null, "input_tokens": 486, "output_tokens": 4, "latency_ms": 1867.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2482-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 619, "output_tokens": 4, "latency_ms": 919.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2757-right", "label": true, "pred": true, "score": null, "input_tokens": 463, "output_tokens": 4, "latency_ms": 995.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6545-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 491, "output_tokens": 46, "latency_ms": 1443.0, "calls": 1, "feedback": "NO\n\nThe context mentions the Holston River, Cherokee Lake and Tennessee cities. ", "error": null}
+{"id": "839-right", "label": true, "pred": true, "score": null, "input_tokens": 518, "output_tokens": 4, "latency_ms": 1156.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5690-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 627, "output_tokens": 4, "latency_ms": 1494.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9535-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 500, "output_tokens": 4, "latency_ms": 1022.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1361-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 542, "output_tokens": 4, "latency_ms": 824.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6677-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 463, "output_tokens": 73, "latency_ms": 1732.1, "calls": 1, "feedback": "YES\n\nThe context says the Shore Temple was built in 700\u2013728 AD, so 700 AD is its", "error": null}
+{"id": "7953-right", "label": true, "pred": true, "score": null, "input_tokens": 601, "output_tokens": 4, "latency_ms": 1578.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7033-right", "label": true, "pred": true, "score": null, "input_tokens": 486, "output_tokens": 4, "latency_ms": 1026.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6381-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 536, "output_tokens": 4, "latency_ms": 1161.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7993-right", "label": true, "pred": true, "score": null, "input_tokens": 514, "output_tokens": 48, "latency_ms": 1190.6, "calls": 1, "feedback": "YES\n\nThe context says David Rockefeller was chairman and chief executive of Chas", "error": null}
+{"id": "5558-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 552, "output_tokens": 4, "latency_ms": 934.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5350-right", "label": true, "pred": true, "score": null, "input_tokens": 496, "output_tokens": 4, "latency_ms": 1584.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2728-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 488, "output_tokens": 48, "latency_ms": 1733.6, "calls": 1, "feedback": "NO\n\nThe context mentions the 2192nd Communications Squadron, not a \"2192nd Fight", "error": null}
+{"id": "3092-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 556, "output_tokens": 96, "latency_ms": 1469.1, "calls": 1, "feedback": "NO\n\nThe context says qutebrowser uses DuckDuckGo as its default search engine. I", "error": null}
+{"id": "5515-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 521, "output_tokens": 4, "latency_ms": 788.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7621-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 488, "output_tokens": 49, "latency_ms": 1888.1, "calls": 1, "feedback": "NO\n\nThe context places Hornby Castle in the Lune Valley, not the \"Hornby Valley\"", "error": null}
+{"id": "6977-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 500, "output_tokens": 4, "latency_ms": 1144.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6605-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 548, "output_tokens": 4, "latency_ms": 1215.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2314-right", "label": true, "pred": true, "score": null, "input_tokens": 595, "output_tokens": 4, "latency_ms": 1026.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1750-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 573, "output_tokens": 51, "latency_ms": 1392.9, "calls": 1, "feedback": "NO\n\nThe context gives Jennifer Love Hewitt's birth date as February 21, 1979, no", "error": null}
+{"id": "5173-right", "label": true, "pred": true, "score": null, "input_tokens": 474, "output_tokens": 4, "latency_ms": 1934.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8880-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 501, "output_tokens": 4, "latency_ms": 1036.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8275-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 505, "output_tokens": 4, "latency_ms": 1071.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1702-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 582, "output_tokens": 4, "latency_ms": 1065.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4098-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 487, "output_tokens": 108, "latency_ms": 1463.5, "calls": 1, "feedback": "NO\n\nThe context defines EMCC, formerly EMJC, as a community college in Mississip", "error": null}
+{"id": "7519-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 552, "output_tokens": 4, "latency_ms": 1175.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5600-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 518, "output_tokens": 98, "latency_ms": 1892.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3433-right", "label": true, "pred": true, "score": null, "input_tokens": 510, "output_tokens": 4, "latency_ms": 1081.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "326-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 486, "output_tokens": 65, "latency_ms": 1590.0, "calls": 1, "feedback": "NO\n\nThe context mentions Ram Charan, Priyanka Chopra, and the movie \"Zanjeer.\" I", "error": null}
+{"id": "536-right", "label": true, "pred": true, "score": null, "input_tokens": 523, "output_tokens": 4, "latency_ms": 1727.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1361-right", "label": true, "pred": true, "score": null, "input_tokens": 541, "output_tokens": 4, "latency_ms": 1070.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "424-right", "label": true, "pred": true, "score": null, "input_tokens": 522, "output_tokens": 4, "latency_ms": 1703.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7033-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 489, "output_tokens": 83, "latency_ms": 2977.8, "calls": 1, "feedback": "NO\n\nThe context never mentions a film or show called \"Stranger\", so it doesn't s", "error": null}
+{"id": "9745-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 463, "output_tokens": 54, "latency_ms": 1452.2, "calls": 1, "feedback": "NO\n\nThe context mentions only the film \"The Company,\" directed by Robert Altman ", "error": null}
+{"id": "3504-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 546, "output_tokens": 256, "latency_ms": 2352.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5365-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 554, "output_tokens": 4, "latency_ms": 1019.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1636-right", "label": true, "pred": true, "score": null, "input_tokens": 673, "output_tokens": 4, "latency_ms": 1129.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2074-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 505, "output_tokens": 4, "latency_ms": 1547.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4786-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 446, "output_tokens": 139, "latency_ms": 2238.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6047-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 584, "output_tokens": 4, "latency_ms": 1317.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6545-right", "label": true, "pred": true, "score": null, "input_tokens": 488, "output_tokens": 4, "latency_ms": 1207.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9603-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 562, "output_tokens": 136, "latency_ms": 1861.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1622-right", "label": true, "pred": true, "score": null, "input_tokens": 491, "output_tokens": 4, "latency_ms": 1533.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1864-right", "label": true, "pred": true, "score": null, "input_tokens": 624, "output_tokens": 4, "latency_ms": 1200.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5003-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 567, "output_tokens": 4, "latency_ms": 1111.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1422-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 623, "output_tokens": 4, "latency_ms": 2126.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3557-right", "label": true, "pred": true, "score": null, "input_tokens": 526, "output_tokens": 4, "latency_ms": 1000.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "376-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 543, "output_tokens": 4, "latency_ms": 973.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9177-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 526, "output_tokens": 4, "latency_ms": 1018.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2449-right", "label": true, "pred": true, "score": null, "input_tokens": 501, "output_tokens": 4, "latency_ms": 1054.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "536-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 524, "output_tokens": 4, "latency_ms": 1026.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6669-right", "label": true, "pred": true, "score": null, "input_tokens": 546, "output_tokens": 4, "latency_ms": 1524.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6291-right", "label": true, "pred": true, "score": null, "input_tokens": 458, "output_tokens": 4, "latency_ms": 1046.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7815-right", "label": true, "pred": true, "score": null, "input_tokens": 495, "output_tokens": 70, "latency_ms": 1444.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5753-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 510, "output_tokens": 54, "latency_ms": 1718.7, "calls": 1, "feedback": "Britten was born in 1913 and Donizetti in 1797, so Donizetti was born first. The", "error": null}
+{"id": "2211-right", "label": true, "pred": true, "score": null, "input_tokens": 649, "output_tokens": 4, "latency_ms": 1786.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "602-right", "label": true, "pred": true, "score": null, "input_tokens": 533, "output_tokens": 4, "latency_ms": 1668.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6291-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 457, "output_tokens": 64, "latency_ms": 1283.6, "calls": 1, "feedback": "NO\n\nThe context gives Lucas McCown's parents, his birth date, and says he is a f", "error": null}
+{"id": "9535-right", "label": true, "pred": true, "score": null, "input_tokens": 499, "output_tokens": 4, "latency_ms": 1075.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7244-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 511, "output_tokens": 4, "latency_ms": 1195.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4562-right", "label": true, "pred": true, "score": null, "input_tokens": 610, "output_tokens": 4, "latency_ms": 1765.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6700-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 564, "output_tokens": 4, "latency_ms": 2516.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2296-right", "label": true, "pred": true, "score": null, "input_tokens": 550, "output_tokens": 4, "latency_ms": 1630.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9924-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 505, "output_tokens": 4, "latency_ms": 1121.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5069-right", "label": true, "pred": true, "score": null, "input_tokens": 451, "output_tokens": 4, "latency_ms": 1431.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6373-right", "label": true, "pred": true, "score": null, "input_tokens": 596, "output_tokens": 4, "latency_ms": 1151.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8898-right", "label": true, "pred": true, "score": null, "input_tokens": 527, "output_tokens": 4, "latency_ms": 1303.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3204-right", "label": true, "pred": true, "score": null, "input_tokens": 503, "output_tokens": 4, "latency_ms": 1027.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5004-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 535, "output_tokens": 77, "latency_ms": 2216.8, "calls": 1, "feedback": "NO\n\nThe context lists the singers who provided the animal voices and mentions Ra", "error": null}
+{"id": "3895-right", "label": true, "pred": true, "score": null, "input_tokens": 548, "output_tokens": 4, "latency_ms": 1818.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8724-right", "label": true, "pred": true, "score": null, "input_tokens": 510, "output_tokens": 4, "latency_ms": 2181.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7327-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 515, "output_tokens": 4, "latency_ms": 918.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8246-right", "label": true, "pred": true, "score": null, "input_tokens": 507, "output_tokens": 4, "latency_ms": 1330.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9769-right", "label": true, "pred": true, "score": null, "input_tokens": 525, "output_tokens": 4, "latency_ms": 2617.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9591-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 574, "output_tokens": 4, "latency_ms": 1043.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3925-right", "label": true, "pred": true, "score": null, "input_tokens": 506, "output_tokens": 67, "latency_ms": 1350.3, "calls": 1, "feedback": "YES\n\nThe context says the Rangers are one of three NHL franchises in the New Yor", "error": null}
+{"id": "7437-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 585, "output_tokens": 144, "latency_ms": 1952.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9806-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 474, "output_tokens": 41, "latency_ms": 2003.6, "calls": 1, "feedback": "NO\n\nThe context describes Jutland cattle as a *rare* Danish breed, which contrad", "error": null}
+{"id": "2443-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 573, "output_tokens": 44, "latency_ms": 2003.5, "calls": 1, "feedback": "NO\n\nThe context says Page was President of the British Academy from 1971\u201374. It ", "error": null}
+{"id": "6677-right", "label": true, "pred": true, "score": null, "input_tokens": 463, "output_tokens": 104, "latency_ms": 1556.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8275-right", "label": true, "pred": true, "score": null, "input_tokens": 501, "output_tokens": 4, "latency_ms": 1098.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7940-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 511, "output_tokens": 4, "latency_ms": 1336.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6283-right", "label": true, "pred": true, "score": null, "input_tokens": 521, "output_tokens": 4, "latency_ms": 861.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3672-right", "label": true, "pred": true, "score": null, "input_tokens": 568, "output_tokens": 4, "latency_ms": 1077.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5690-right", "label": true, "pred": true, "score": null, "input_tokens": 628, "output_tokens": 4, "latency_ms": 1108.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5176-right", "label": true, "pred": true, "score": null, "input_tokens": 545, "output_tokens": 4, "latency_ms": 1023.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2054-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 565, "output_tokens": 77, "latency_ms": 1783.8, "calls": 1, "feedback": "NO\n\nThe context gives Everson v. Board of Education as decided in 1947 and Rasul", "error": null}
+{"id": "9603-right", "label": true, "pred": true, "score": null, "input_tokens": 561, "output_tokens": 4, "latency_ms": 1133.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1066-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 689, "output_tokens": 4, "latency_ms": 979.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7171-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 566, "output_tokens": 4, "latency_ms": 1046.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8766-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 465, "output_tokens": 4, "latency_ms": 1149.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9795-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 491, "output_tokens": 4, "latency_ms": 1235.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8408-right", "label": true, "pred": true, "score": null, "input_tokens": 521, "output_tokens": 4, "latency_ms": 1208.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1014-right", "label": true, "pred": true, "score": null, "input_tokens": 533, "output_tokens": 4, "latency_ms": 2564.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2949-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 465, "output_tokens": 4, "latency_ms": 1182.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8705-right", "label": true, "pred": true, "score": null, "input_tokens": 600, "output_tokens": 4, "latency_ms": 1095.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6373-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 605, "output_tokens": 4, "latency_ms": 1381.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6669-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 547, "output_tokens": 4, "latency_ms": 1022.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9924-right", "label": true, "pred": true, "score": null, "input_tokens": 503, "output_tokens": 4, "latency_ms": 1142.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3672-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 574, "output_tokens": 4, "latency_ms": 859.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9287-right", "label": true, "pred": true, "score": null, "input_tokens": 520, "output_tokens": 4, "latency_ms": 1031.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "232-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 571, "output_tokens": 4, "latency_ms": 1061.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3553-right", "label": true, "pred": true, "score": null, "input_tokens": 497, "output_tokens": 4, "latency_ms": 754.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6130-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 538, "output_tokens": 63, "latency_ms": 1396.1, "calls": 1, "feedback": "NO\n\nThe context discusses the \"Duke lacrosse case,\" which took place in Durham, ", "error": null}
+{"id": "8003-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 540, "output_tokens": 40, "latency_ms": 1700.4, "calls": 1, "feedback": "NO\n\nThe context does not mention \"The Beast.\" It only gives Jevon Kearse's nickn", "error": null}
+{"id": "7844-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 556, "output_tokens": 4, "latency_ms": 1733.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5275-right", "label": true, "pred": true, "score": null, "input_tokens": 487, "output_tokens": 4, "latency_ms": 1723.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9583-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 495, "output_tokens": 4, "latency_ms": 1739.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1147-right", "label": true, "pred": true, "score": null, "input_tokens": 582, "output_tokens": 4, "latency_ms": 1603.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9177-right", "label": true, "pred": true, "score": null, "input_tokens": 530, "output_tokens": 4, "latency_ms": 1161.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3041-right", "label": true, "pred": true, "score": null, "input_tokens": 512, "output_tokens": 4, "latency_ms": 1039.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7025-right", "label": true, "pred": true, "score": null, "input_tokens": 577, "output_tokens": 4, "latency_ms": 945.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8408-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 520, "output_tokens": 4, "latency_ms": 1451.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5582-right", "label": true, "pred": true, "score": null, "input_tokens": 529, "output_tokens": 4, "latency_ms": 1132.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1636-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 669, "output_tokens": 4, "latency_ms": 2395.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9900-right", "label": true, "pred": true, "score": null, "input_tokens": 478, "output_tokens": 4, "latency_ms": 1708.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7165-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 565, "output_tokens": 138, "latency_ms": 1713.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7790-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 469, "output_tokens": 4, "latency_ms": 1376.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9767-right", "label": true, "pred": true, "score": null, "input_tokens": 562, "output_tokens": 4, "latency_ms": 1218.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8926-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 567, "output_tokens": 4, "latency_ms": 1133.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2296-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 550, "output_tokens": 46, "latency_ms": 1532.4, "calls": 1, "feedback": "NO\n\nThe context describes the section around the crossing of the River Ribble, n", "error": null}
+{"id": "195-right", "label": true, "pred": true, "score": null, "input_tokens": 517, "output_tokens": 38, "latency_ms": 1572.8, "calls": 1, "feedback": "YES\n\nThe context says John Speed was \"the best known English mapmaker of the Stu", "error": null}
+{"id": "4651-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 527, "output_tokens": 4, "latency_ms": 1068.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8705-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 599, "output_tokens": 4, "latency_ms": 1002.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4492-right", "label": true, "pred": true, "score": null, "input_tokens": 509, "output_tokens": 4, "latency_ms": 1543.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1338-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 555, "output_tokens": 4, "latency_ms": 1109.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "891-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 478, "output_tokens": 53, "latency_ms": 1188.9, "calls": 1, "feedback": "YES\n\nThe context describes Guanghan as a county-level city in Deyang, Sichuan. T", "error": null}
+{"id": "4981-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 521, "output_tokens": 191, "latency_ms": 2611.5, "calls": 1, "feedback": "NO\n\nThe context says only that he is the eldest son of Shirley Jones and Jack Ca", "error": null}
+{"id": "5472-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 540, "output_tokens": 92, "latency_ms": 1866.4, "calls": 1, "feedback": "NO\n\nThe context says Elizabeth Mitchell is an American actress known for playing", "error": null}
+{"id": "7918-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 680, "output_tokens": 103, "latency_ms": 2455.9, "calls": 1, "feedback": "The context lists the cast of Parks and Recreation and their characters, but it ", "error": null}
+{"id": "4748-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 494, "output_tokens": 181, "latency_ms": 1839.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "936-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 482, "output_tokens": 4, "latency_ms": 984.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "839-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 514, "output_tokens": 4, "latency_ms": 1074.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7429-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 613, "output_tokens": 50, "latency_ms": 1457.1, "calls": 1, "feedback": "NO\n\nThe context names Tom Holland, whose full name is Thomas Stanley Holland. It", "error": null}
+{"id": "3941-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 592, "output_tokens": 4, "latency_ms": 996.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "970-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 543, "output_tokens": 4, "latency_ms": 1686.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4098-right", "label": true, "pred": true, "score": null, "input_tokens": 478, "output_tokens": 4, "latency_ms": 1084.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "424-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 522, "output_tokens": 56, "latency_ms": 1265.9, "calls": 1, "feedback": "NO\n\nThe context says Beyond the Gates of Splendor was released in 2004 and Jesus", "error": null}
+{"id": "5808-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 471, "output_tokens": 4, "latency_ms": 1463.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2585-right", "label": true, "pred": true, "score": null, "input_tokens": 496, "output_tokens": 4, "latency_ms": 1041.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7992-right", "label": true, "pred": true, "score": null, "input_tokens": 595, "output_tokens": 4, "latency_ms": 1051.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4145-right", "label": true, "pred": true, "score": null, "input_tokens": 607, "output_tokens": 4, "latency_ms": 1149.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2493-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 500, "output_tokens": 96, "latency_ms": 1992.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9707-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 623, "output_tokens": 42, "latency_ms": 2063.1, "calls": 1, "feedback": "YES\n\nThe context names Lea Michele as the actress playing Rachel Berry in the Gl", "error": null}
+{"id": "3158-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 522, "output_tokens": 4, "latency_ms": 1044.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1338-right", "label": true, "pred": true, "score": null, "input_tokens": 557, "output_tokens": 4, "latency_ms": 2054.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1938-right", "label": true, "pred": true, "score": null, "input_tokens": 512, "output_tokens": 4, "latency_ms": 1048.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1205-right", "label": true, "pred": true, "score": null, "input_tokens": 535, "output_tokens": 4, "latency_ms": 1222.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5600-right", "label": true, "pred": true, "score": null, "input_tokens": 516, "output_tokens": 4, "latency_ms": 966.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2293-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 510, "output_tokens": 4, "latency_ms": 1165.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6599-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 551, "output_tokens": 4, "latency_ms": 1276.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3675-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 537, "output_tokens": 4, "latency_ms": 1454.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5163-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 559, "output_tokens": 4, "latency_ms": 1260.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5275-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 492, "output_tokens": 4, "latency_ms": 1203.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3895-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 549, "output_tokens": 45, "latency_ms": 1646.4, "calls": 1, "feedback": "NO\n\nThe context names him \"Christopher 'Big Black' Boykin,\" not \"Big Brown,\" so ", "error": null}
+{"id": "3553-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 496, "output_tokens": 4, "latency_ms": 932.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "472-right", "label": true, "pred": true, "score": null, "input_tokens": 502, "output_tokens": 4, "latency_ms": 1353.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3465-right", "label": true, "pred": true, "score": null, "input_tokens": 562, "output_tokens": 4, "latency_ms": 1714.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3126-right", "label": true, "pred": true, "score": null, "input_tokens": 598, "output_tokens": 4, "latency_ms": 1515.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9287-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 522, "output_tokens": 4, "latency_ms": 1500.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4559-right", "label": true, "pred": true, "score": null, "input_tokens": 573, "output_tokens": 4, "latency_ms": 2347.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7735-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 499, "output_tokens": 4, "latency_ms": 1003.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6101-right", "label": true, "pred": true, "score": null, "input_tokens": 532, "output_tokens": 4, "latency_ms": 1106.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "814-right", "label": true, "pred": true, "score": null, "input_tokens": 630, "output_tokens": 4, "latency_ms": 1015.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3995-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 480, "output_tokens": 57, "latency_ms": 1376.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8657-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 524, "output_tokens": 4, "latency_ms": 1046.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9622-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 567, "output_tokens": 4, "latency_ms": 1185.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1391-right", "label": true, "pred": true, "score": null, "input_tokens": 547, "output_tokens": 4, "latency_ms": 1378.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8246-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 510, "output_tokens": 61, "latency_ms": 2040.0, "calls": 1, "feedback": "NO\n\nThe context says the Red Raiders play home games at Dan Law Field at Rip Gri", "error": null}
+{"id": "7992-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 595, "output_tokens": 4, "latency_ms": 1133.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1399-right", "label": true, "pred": true, "score": null, "input_tokens": 533, "output_tokens": 4, "latency_ms": 2466.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8926-right", "label": true, "pred": true, "score": null, "input_tokens": 565, "output_tokens": 4, "latency_ms": 976.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3486-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 599, "output_tokens": 51, "latency_ms": 1278.4, "calls": 1, "feedback": "Answer: YES\n\nThe context describes the Ghana Club 100 as a yearly official list ", "error": null}
+{"id": "3504-right", "label": true, "pred": true, "score": null, "input_tokens": 546, "output_tokens": 4, "latency_ms": 1073.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "776-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 490, "output_tokens": 4, "latency_ms": 2499.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5455-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 563, "output_tokens": 130, "latency_ms": 1735.1, "calls": 1, "feedback": "NO\n\nThe context says nothing about whether a Ponsonby baronet served as a Conser", "error": null}
+{"id": "5365-right", "label": true, "pred": true, "score": null, "input_tokens": 554, "output_tokens": 4, "latency_ms": 1347.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5657-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 506, "output_tokens": 4, "latency_ms": 1582.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2314-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 595, "output_tokens": 4, "latency_ms": 905.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7306-right", "label": true, "pred": true, "score": null, "input_tokens": 571, "output_tokens": 4, "latency_ms": 915.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "538-right", "label": true, "pred": true, "score": null, "input_tokens": 443, "output_tokens": 4, "latency_ms": 1135.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8657-right", "label": true, "pred": true, "score": null, "input_tokens": 528, "output_tokens": 4, "latency_ms": 1072.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7171-right", "label": true, "pred": true, "score": null, "input_tokens": 564, "output_tokens": 4, "latency_ms": 1036.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8833-right", "label": true, "pred": true, "score": null, "input_tokens": 550, "output_tokens": 4, "latency_ms": 1276.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9526-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 457, "output_tokens": 76, "latency_ms": 2534.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9806-right", "label": true, "pred": true, "score": null, "input_tokens": 470, "output_tokens": 4, "latency_ms": 1005.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9745-right", "label": true, "pred": true, "score": null, "input_tokens": 458, "output_tokens": 4, "latency_ms": 1365.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "197-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 505, "output_tokens": 4, "latency_ms": 1087.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "602-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 533, "output_tokens": 99, "latency_ms": 1878.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "66-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 565, "output_tokens": 4, "latency_ms": 1384.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "951-right", "label": true, "pred": true, "score": null, "input_tokens": 581, "output_tokens": 4, "latency_ms": 1477.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1694-right", "label": true, "pred": true, "score": null, "input_tokens": 493, "output_tokens": 4, "latency_ms": 1649.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "316-right", "label": true, "pred": true, "score": null, "input_tokens": 436, "output_tokens": 4, "latency_ms": 1107.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5721-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 558, "output_tokens": 4, "latency_ms": 1056.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3342-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 458, "output_tokens": 426, "latency_ms": 3541.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3013-right", "label": true, "pred": true, "score": null, "input_tokens": 554, "output_tokens": 4, "latency_ms": 1018.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6678-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 479, "output_tokens": 4, "latency_ms": 1008.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1702-right", "label": true, "pred": true, "score": null, "input_tokens": 583, "output_tokens": 4, "latency_ms": 1098.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8003-right", "label": true, "pred": true, "score": null, "input_tokens": 540, "output_tokens": 4, "latency_ms": 1200.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7244-right", "label": true, "pred": true, "score": null, "input_tokens": 515, "output_tokens": 4, "latency_ms": 1681.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1066-right", "label": true, "pred": true, "score": null, "input_tokens": 684, "output_tokens": 4, "latency_ms": 833.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4733-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 537, "output_tokens": 4, "latency_ms": 1994.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2118-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 549, "output_tokens": 49, "latency_ms": 1348.3, "calls": 1, "feedback": "NO\n\nThe context says the 2003 SEC Championship Game was played in the Georgia Do", "error": null}
+{"id": "1019-right", "label": true, "pred": true, "score": null, "input_tokens": 484, "output_tokens": 4, "latency_ms": 1011.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6047-right", "label": true, "pred": true, "score": null, "input_tokens": 584, "output_tokens": 4, "latency_ms": 1055.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1399-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 537, "output_tokens": 4, "latency_ms": 1236.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6224-right", "label": true, "pred": true, "score": null, "input_tokens": 519, "output_tokens": 134, "latency_ms": 2020.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4041-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 604, "output_tokens": 4, "latency_ms": 1298.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6977-right", "label": true, "pred": true, "score": null, "input_tokens": 499, "output_tokens": 4, "latency_ms": 1063.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2153-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 595, "output_tokens": 4, "latency_ms": 2689.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9146-right", "label": true, "pred": true, "score": null, "input_tokens": 483, "output_tokens": 4, "latency_ms": 1139.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4623-right", "label": true, "pred": true, "score": null, "input_tokens": 472, "output_tokens": 4, "latency_ms": 1124.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3941-right", "label": true, "pred": true, "score": null, "input_tokens": 595, "output_tokens": 4, "latency_ms": 1110.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6709-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 549, "output_tokens": 4, "latency_ms": 3597.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5316-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 460, "output_tokens": 4, "latency_ms": 970.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8660-right", "label": true, "pred": true, "score": null, "input_tokens": 513, "output_tokens": 4, "latency_ms": 1183.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8724-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 515, "output_tokens": 4, "latency_ms": 1590.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4041-right", "label": true, "pred": true, "score": null, "input_tokens": 598, "output_tokens": 4, "latency_ms": 1519.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2261-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 546, "output_tokens": 92, "latency_ms": 2494.1, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3526-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 508, "output_tokens": 4, "latency_ms": 1427.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1147-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 585, "output_tokens": 4, "latency_ms": 1489.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "776-right", "label": true, "pred": true, "score": null, "input_tokens": 489, "output_tokens": 4, "latency_ms": 1130.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9838-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 566, "output_tokens": 87, "latency_ms": 1422.2, "calls": 1, "feedback": "The claim is that the Whitewater Canal came first. The context says the Washingt", "error": null}
+{"id": "3405-right", "label": true, "pred": true, "score": null, "input_tokens": 505, "output_tokens": 4, "latency_ms": 1720.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5515-right", "label": true, "pred": true, "score": null, "input_tokens": 513, "output_tokens": 4, "latency_ms": 1803.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7165-right", "label": true, "pred": true, "score": null, "input_tokens": 572, "output_tokens": 4, "latency_ms": 1047.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "538-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 447, "output_tokens": 61, "latency_ms": 3755.7, "calls": 1, "feedback": "NO\n\nThe context describes Hyde United as a semi-professional club in Hyde, Great", "error": null}
+{"id": "2343-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 694, "output_tokens": 64, "latency_ms": 1231.2, "calls": 1, "feedback": "NO\n\nThe context names Thomas Howard as the 21st Earl of Arundel, not \"Thomas Tal", "error": null}
+{"id": "9769-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 523, "output_tokens": 159, "latency_ms": 1879.5, "calls": 1, "feedback": "The context says Weiland was best known as the lead singer of Stone Temple Pilot", "error": null}
+{"id": "6357-right", "label": true, "pred": true, "score": null, "input_tokens": 490, "output_tokens": 4, "latency_ms": 943.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5052-right", "label": true, "pred": true, "score": null, "input_tokens": 526, "output_tokens": 4, "latency_ms": 1146.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8766-right", "label": true, "pred": true, "score": null, "input_tokens": 465, "output_tokens": 4, "latency_ms": 1217.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1978-right", "label": true, "pred": true, "score": null, "input_tokens": 586, "output_tokens": 4, "latency_ms": 1887.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "611-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 481, "output_tokens": 4, "latency_ms": 1009.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4902-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 600, "output_tokens": 4, "latency_ms": 2323.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3248-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 488, "output_tokens": 70, "latency_ms": 1223.0, "calls": 1, "feedback": "NO\n\nThe context says Clockwork Angel is a novel by Cassandra Clare and that she ", "error": null}
+{"id": "9719-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 486, "output_tokens": 4, "latency_ms": 1110.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1262-right", "label": true, "pred": true, "score": null, "input_tokens": 528, "output_tokens": 4, "latency_ms": 1179.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "472-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 506, "output_tokens": 4, "latency_ms": 1030.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2941-right", "label": true, "pred": true, "score": null, "input_tokens": 528, "output_tokens": 31, "latency_ms": 2551.6, "calls": 1, "feedback": "YES\n\nThe context mentions Westfield Parramatta as the shopping centre where the ", "error": null}
+{"id": "6709-right", "label": true, "pred": true, "score": null, "input_tokens": 542, "output_tokens": 4, "latency_ms": 2195.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9559-right", "label": true, "pred": true, "score": null, "input_tokens": 518, "output_tokens": 4, "latency_ms": 1040.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1019-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 492, "output_tokens": 4, "latency_ms": 2064.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4924-right", "label": true, "pred": true, "score": null, "input_tokens": 521, "output_tokens": 4, "latency_ms": 1213.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1709-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 553, "output_tokens": 4, "latency_ms": 1451.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8240-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 447, "output_tokens": 4, "latency_ms": 1579.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "6287-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 456, "output_tokens": 4, "latency_ms": 1418.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4119-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 532, "output_tokens": 4, "latency_ms": 1058.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9526-right", "label": true, "pred": true, "score": null, "input_tokens": 455, "output_tokens": 4, "latency_ms": 1040.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3086-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 520, "output_tokens": 44, "latency_ms": 1771.8, "calls": 1, "feedback": "NO\n\nThe context says the 800 metres is a standard middle-distance event, but it ", "error": null}
+{"id": "7716-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 572, "output_tokens": 4, "latency_ms": 1064.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9694-right", "label": true, "pred": true, "score": null, "input_tokens": 536, "output_tokens": 4, "latency_ms": 2728.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1622-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 492, "output_tokens": 48, "latency_ms": 1867.1, "calls": 1, "feedback": "NO\n\nThe context describes the Astor Place Riot of 1849, not a fire, so it does n", "error": null}
+{"id": "3158-right", "label": true, "pred": true, "score": null, "input_tokens": 524, "output_tokens": 4, "latency_ms": 1084.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7323-right", "label": true, "pred": true, "score": null, "input_tokens": 463, "output_tokens": 4, "latency_ms": 4430.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2054-right", "label": true, "pred": true, "score": null, "input_tokens": 559, "output_tokens": 4, "latency_ms": 803.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7025-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 572, "output_tokens": 124, "latency_ms": 2024.0, "calls": 1, "feedback": "The context lists six hosts of the 30th Tony Awards: Eddie Albert, Richard Burto", "error": null}
+{"id": "3348-right", "label": true, "pred": true, "score": null, "input_tokens": 569, "output_tokens": 4, "latency_ms": 1235.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4019-right", "label": true, "pred": true, "score": null, "input_tokens": 547, "output_tokens": 4, "latency_ms": 1485.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6605-right", "label": true, "pred": true, "score": null, "input_tokens": 547, "output_tokens": 4, "latency_ms": 1052.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1939-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 570, "output_tokens": 4, "latency_ms": 1819.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3433-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 511, "output_tokens": 4, "latency_ms": 1023.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "5052-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 525, "output_tokens": 53, "latency_ms": 1253.6, "calls": 1, "feedback": "NO\n\nThe context mentions \"Border Ruffians,\" not \"Border Raiders.\" The phrase \"Bo", "error": null}
+{"id": "4651-right", "label": true, "pred": true, "score": null, "input_tokens": 528, "output_tokens": 4, "latency_ms": 1424.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3516-right", "label": true, "pred": true, "score": null, "input_tokens": 669, "output_tokens": 4, "latency_ms": 1525.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7871-right", "label": true, "pred": true, "score": null, "input_tokens": 481, "output_tokens": 4, "latency_ms": 1306.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5350-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 493, "output_tokens": 4, "latency_ms": 1128.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9688-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 489, "output_tokens": 4, "latency_ms": 1132.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7871-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 485, "output_tokens": 103, "latency_ms": 1511.1, "calls": 1, "feedback": "The context says the Player Draft for the inaugural Pakistan Super League season", "error": null}
+{"id": "3126-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 599, "output_tokens": 4, "latency_ms": 932.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1750-right", "label": true, "pred": true, "score": null, "input_tokens": 573, "output_tokens": 4, "latency_ms": 1005.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4492-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 517, "output_tokens": 183, "latency_ms": 4853.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2829-right", "label": true, "pred": true, "score": null, "input_tokens": 504, "output_tokens": 4, "latency_ms": 1518.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3204-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 505, "output_tokens": 4, "latency_ms": 1112.0, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7327-right", "label": true, "pred": true, "score": null, "input_tokens": 513, "output_tokens": 4, "latency_ms": 1604.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8617-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 507, "output_tokens": 4, "latency_ms": 2601.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4623-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 474, "output_tokens": 56, "latency_ms": 1371.0, "calls": 1, "feedback": "NO\n\nThe context mentions \"The Blueprint,\" Jay-Z's sixth studio album, but it say", "error": null}
+{"id": "197-right", "label": true, "pred": true, "score": null, "input_tokens": 505, "output_tokens": 4, "latency_ms": 876.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7690-right", "label": true, "pred": true, "score": null, "input_tokens": 528, "output_tokens": 4, "latency_ms": 1098.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4145-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 606, "output_tokens": 4, "latency_ms": 2064.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7790-right", "label": true, "pred": true, "score": null, "input_tokens": 472, "output_tokens": 4, "latency_ms": 4563.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2493-right", "label": true, "pred": true, "score": null, "input_tokens": 504, "output_tokens": 4, "latency_ms": 1168.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2018-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 533, "output_tokens": 4, "latency_ms": 1059.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8942-right", "label": true, "pred": true, "score": null, "input_tokens": 476, "output_tokens": 4, "latency_ms": 1372.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "696-right", "label": true, "pred": true, "score": null, "input_tokens": 584, "output_tokens": 4, "latency_ms": 1039.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7232-right", "label": true, "pred": true, "score": null, "input_tokens": 600, "output_tokens": 4, "latency_ms": 1022.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1391-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 548, "output_tokens": 4, "latency_ms": 1069.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7621-right", "label": true, "pred": true, "score": null, "input_tokens": 487, "output_tokens": 4, "latency_ms": 1717.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8501-right", "label": true, "pred": true, "score": null, "input_tokens": 544, "output_tokens": 4, "latency_ms": 1389.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7940-right", "label": true, "pred": true, "score": null, "input_tokens": 510, "output_tokens": 4, "latency_ms": 835.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3938-right", "label": true, "pred": true, "score": null, "input_tokens": 548, "output_tokens": 4, "latency_ms": 1280.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2386-right", "label": true, "pred": true, "score": null, "input_tokens": 453, "output_tokens": 4, "latency_ms": 1192.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5003-right", "label": true, "pred": true, "score": null, "input_tokens": 568, "output_tokens": 4, "latency_ms": 2980.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4748-right", "label": true, "pred": true, "score": null, "input_tokens": 489, "output_tokens": 4, "latency_ms": 1006.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "115-right", "label": true, "pred": true, "score": null, "input_tokens": 488, "output_tokens": 4, "latency_ms": 1209.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6599-right", "label": true, "pred": true, "score": null, "input_tokens": 555, "output_tokens": 4, "latency_ms": 1096.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8501-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 547, "output_tokens": 4, "latency_ms": 1978.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "376-right", "label": true, "pred": true, "score": null, "input_tokens": 544, "output_tokens": 50, "latency_ms": 1225.3, "calls": 1, "feedback": "YES\n\nThe context mentions Hey Monday as one of the three bands featured on the m", "error": null}
+{"id": "4034-right", "label": true, "pred": true, "score": null, "input_tokens": 493, "output_tokens": 4, "latency_ms": 1035.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9838-right", "label": true, "pred": true, "score": null, "input_tokens": 562, "output_tokens": 4, "latency_ms": 1123.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3405-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 509, "output_tokens": 417, "latency_ms": 4460.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2728-right", "label": true, "pred": true, "score": null, "input_tokens": 485, "output_tokens": 4, "latency_ms": 1679.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5994-right", "label": true, "pred": true, "score": null, "input_tokens": 495, "output_tokens": 4, "latency_ms": 1193.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2153-right", "label": true, "pred": true, "score": null, "input_tokens": 597, "output_tokens": 4, "latency_ms": 815.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6283-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 519, "output_tokens": 4, "latency_ms": 1225.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "970-right", "label": true, "pred": true, "score": null, "input_tokens": 535, "output_tokens": 4, "latency_ms": 1362.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6734-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 472, "output_tokens": 4, "latency_ms": 1077.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7720-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 624, "output_tokens": 76, "latency_ms": 2067.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2920-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 549, "output_tokens": 4, "latency_ms": 1399.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8240-right", "label": true, "pred": true, "score": null, "input_tokens": 446, "output_tokens": 4, "latency_ms": 1670.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3675-right", "label": true, "pred": true, "score": null, "input_tokens": 535, "output_tokens": 4, "latency_ms": 933.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9583-right", "label": true, "pred": true, "score": null, "input_tokens": 491, "output_tokens": 4, "latency_ms": 1669.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5455-right", "label": true, "pred": true, "score": null, "input_tokens": 564, "output_tokens": 4, "latency_ms": 1275.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8693-right", "label": true, "pred": true, "score": null, "input_tokens": 549, "output_tokens": 4, "latency_ms": 1551.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "4786-right", "label": true, "pred": true, "score": null, "input_tokens": 440, "output_tokens": 4, "latency_ms": 1022.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9559-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 515, "output_tokens": 4, "latency_ms": 933.6, "calls": 1, "feedback": "NO", "error": null}
+{"id": "1709-right", "label": true, "pred": true, "score": null, "input_tokens": 552, "output_tokens": 4, "latency_ms": 1120.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2386-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 459, "output_tokens": 4, "latency_ms": 1849.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6700-right", "label": true, "pred": true, "score": null, "input_tokens": 564, "output_tokens": 4, "latency_ms": 964.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2502-right", "label": true, "pred": true, "score": null, "input_tokens": 491, "output_tokens": 4, "latency_ms": 1025.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2449-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 516, "output_tokens": 4, "latency_ms": 1158.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3342-right", "label": true, "pred": true, "score": null, "input_tokens": 455, "output_tokens": 4, "latency_ms": 1260.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5173-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 474, "output_tokens": 4, "latency_ms": 1649.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5176-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 545, "output_tokens": 4, "latency_ms": 877.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "814-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 632, "output_tokens": 4, "latency_ms": 1360.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5163-right", "label": true, "pred": true, "score": null, "input_tokens": 561, "output_tokens": 4, "latency_ms": 1008.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "8846-right", "label": true, "pred": true, "score": null, "input_tokens": 456, "output_tokens": 4, "latency_ms": 1145.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2949-right", "label": true, "pred": true, "score": null, "input_tokens": 462, "output_tokens": 4, "latency_ms": 1080.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2443-right", "label": true, "pred": true, "score": null, "input_tokens": 573, "output_tokens": 4, "latency_ms": 1468.3, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3526-right", "label": true, "pred": true, "score": null, "input_tokens": 507, "output_tokens": 4, "latency_ms": 1741.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3426-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 488, "output_tokens": 4, "latency_ms": 929.7, "calls": 1, "feedback": "NO", "error": null}
+{"id": "3086-right", "label": true, "pred": true, "score": null, "input_tokens": 519, "output_tokens": 4, "latency_ms": 1211.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3172-right", "label": true, "pred": true, "score": null, "input_tokens": 508, "output_tokens": 4, "latency_ms": 1136.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5004-right", "label": true, "pred": true, "score": null, "input_tokens": 532, "output_tokens": 4, "latency_ms": 957.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "5316-right", "label": true, "pred": true, "score": null, "input_tokens": 460, "output_tokens": 4, "latency_ms": 1095.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "859-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 532, "output_tokens": 69, "latency_ms": 1315.4, "calls": 1, "feedback": "NO\n\nThe context names the person as Ronald Lawrence \"Ron\" Kovic, not \"Robert Law", "error": null}
+{"id": "1978-hallucinated", "label": false, "pred": true, "score": null, "input_tokens": 591, "output_tokens": 4, "latency_ms": 1711.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3927-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 587, "output_tokens": 253, "latency_ms": 2631.3, "calls": 1, "feedback": "NO", "error": null}
+{"id": "4924-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 527, "output_tokens": 4, "latency_ms": 1270.5, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2388-right", "label": true, "pred": true, "score": null, "input_tokens": 503, "output_tokens": 4, "latency_ms": 826.8, "calls": 1, "feedback": "YES", "error": null}
+{"id": "1262-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 527, "output_tokens": 109, "latency_ms": 2164.9, "calls": 1, "feedback": "NO", "error": null}
+{"id": "8474-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 542, "output_tokens": 63, "latency_ms": 1460.6, "calls": 1, "feedback": "NO\n\nThe context mentions Ateneo de Manila University in Quezon City. It never me", "error": null}
+{"id": "8846-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 456, "output_tokens": 4, "latency_ms": 1078.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "7282-right", "label": true, "pred": true, "score": null, "input_tokens": 511, "output_tokens": 4, "latency_ms": 1068.7, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9856-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 537, "output_tokens": 4, "latency_ms": 2153.2, "calls": 1, "feedback": "NO", "error": null}
+{"id": "2074-right", "label": true, "pred": true, "score": null, "input_tokens": 501, "output_tokens": 4, "latency_ms": 2335.5, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2757-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 466, "output_tokens": 4, "latency_ms": 1232.4, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9146-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 483, "output_tokens": 4, "latency_ms": 1477.8, "calls": 1, "feedback": "NO", "error": null}
+{"id": "9688-right", "label": true, "pred": true, "score": null, "input_tokens": 486, "output_tokens": 4, "latency_ms": 969.0, "calls": 1, "feedback": "YES", "error": null}
+{"id": "2056-right", "label": true, "pred": true, "score": null, "input_tokens": 535, "output_tokens": 4, "latency_ms": 1081.9, "calls": 1, "feedback": "YES", "error": null}
+{"id": "7844-right", "label": true, "pred": true, "score": null, "input_tokens": 554, "output_tokens": 4, "latency_ms": 1121.6, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9856-right", "label": true, "pred": true, "score": null, "input_tokens": 534, "output_tokens": 4, "latency_ms": 1075.1, "calls": 1, "feedback": "YES", "error": null}
+{"id": "6363-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 515, "output_tokens": 75, "latency_ms": 1328.6, "calls": 1, "feedback": "Ezra Koenig was born April 8, 1984, and Sharon den Adel was born July 12, 1974. ", "error": null}
+{"id": "4119-right", "label": true, "pred": true, "score": null, "input_tokens": 530, "output_tokens": 4, "latency_ms": 1106.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "9707-right", "label": true, "pred": true, "score": null, "input_tokens": 624, "output_tokens": 43, "latency_ms": 1300.5, "calls": 1, "feedback": "YES\n\nThe context names Naya Rivera as the actress playing Santana Lopez in the G", "error": null}
+{"id": "7106-right", "label": true, "pred": true, "score": null, "input_tokens": 507, "output_tokens": 4, "latency_ms": 1216.2, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3801-right", "label": true, "pred": true, "score": null, "input_tokens": 503, "output_tokens": 4, "latency_ms": 1705.4, "calls": 1, "feedback": "YES", "error": null}
+{"id": "3938-hallucinated", "label": false, "pred": false, "score": null, "input_tokens": 551, "output_tokens": 94, "latency_ms": 1804.2, "calls": 1, "feedback": "NO\n\nThe context says Gambon played a mystery writer, the detective Maigret, and ", "error": null}
+{"id": "9622-right", "label": true, "pred": true, "score": null, "input_tokens": 569, "output_tokens": 4, "latency_ms": 877.8, "calls": 1, "feedback": "YES", "error": null}

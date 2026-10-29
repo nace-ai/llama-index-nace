@@ -1,0 +1,18 @@
+{
+  "task": "routing",
+  "system": "drex",
+  "model": "drex-v2.0",
+  "n": 320,
+  "n_errors": 0,
+  "accuracy": 0.971875,
+  "balanced_accuracy": null,
+  "roc_auc": null,
+  "usd_per_1k": 0.008975062499999999,
+  "usd_total": 0.0028720199999999994,
+  "input_tokens_mean": 149.584375,
+  "output_tokens_mean": 86.228125,
+  "p50_ms": 479.66839549917495,
+  "p95_ms": 949.3981024006644,
+  "date": "2026-10-28",
+  "error_samples": []
+}

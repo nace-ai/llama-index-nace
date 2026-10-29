@@ -1,0 +1,35 @@
+name: Live
+
+# Real calls to Drex (billed). Nightly and on demand; never on pull requests.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [llama-index-selectors-nace, llama-index-evaluation-nace]
+    env:
+      NACE_API_KEY_LIVE: ${{ secrets.NACE_API_KEY_LIVE }}
+      OPENROUTER_API_KEY_LIVE: ${{ secrets.OPENROUTER_API_KEY_LIVE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+      - name: Require the API key secret
+        run: >
+          test -n "$NACE_API_KEY_LIVE" ||
+          { echo "NACE_API_KEY_LIVE secret is not set"; exit 1; }
+      - run: uv sync --all-packages --all-groups
+      - run: >
+          uv run pytest packages/${{ matrix.package }}/tests
+          --rootdir packages/${{ matrix.package }}
+          -m live -s -q

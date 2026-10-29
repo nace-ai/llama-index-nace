@@ -1,0 +1,18 @@
+{
+  "task": "faithfulness",
+  "system": "llm-strong",
+  "model": "claude-sonnet-5-5",
+  "n": 500,
+  "n_errors": 0,
+  "accuracy": 0.852,
+  "balanced_accuracy": 0.852,
+  "roc_auc": null,
+  "usd_per_1k": 1.422012,
+  "usd_total": 0.711006,
+  "input_tokens_mean": 527.396,
+  "output_tokens_mean": 36.722,
+  "p50_ms": 1384.374729503179,
+  "p95_ms": 7921.181879154029,
+  "date": "2026-10-28",
+  "error_samples": []
+}

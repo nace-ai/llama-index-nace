@@ -131,9 +131,12 @@ def test_text_and_image_sources_together(record: Any) -> None:
 
 
 @pytest.mark.skipif(not OPENROUTER_KEY, reason="set OPENROUTER_API_KEY_LIVE to run")
-def test_openrouter_faithfulness(record: Any) -> None:
+def test_openrouter_faithfulness() -> None:
     evaluator = NaceFaithfulnessEvaluator(
         api_key=OPENROUTER_KEY, base_url="https://openrouter.ai/api/v1"
     )
-    result = seen(evaluator.evaluate(response=FAITHFUL, contexts=CONTEXT), record)
+    result = evaluator.evaluate(response=FAITHFUL, contexts=CONTEXT)
+    assert isinstance(result, NaceEvaluationResult)
     assert result.passing
+    # OpenRouter answers with its own model id and doesn't pass Drex's request id through.
+    assert (result.model or "").startswith("nace-ai/")

@@ -1,5 +1,8 @@
 # llama-index-nace
 
+[![CI](https://img.shields.io/github/actions/workflow/status/nace-ai/llama-index-nace/ci.yml?branch=main&label=CI&logo=github)](https://github.com/nace-ai/llama-index-nace/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/nace-ai/llama-index-nace/blob/main/LICENSE)
+
 LlamaIndex integrations for [Nace](https://nace.ai)'s Drex decision models. Drex scores the options and returns calibrated probabilities instead of writing text that gets parsed.
 
 | Package | Provides |

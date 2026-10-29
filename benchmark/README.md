@@ -132,6 +132,8 @@ dependency group only, not in either package.
 
 Raw datasets are downloaded to `benchmark/.cache` (git-ignored) and are not committed. The
 per-example `.jsonl` files hold only ids, labels, predictions and short feedback snippets.
+Feedback can quote HaluEval passages; its license notice is reproduced in
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ## Prices (USD per 1M tokens)
 

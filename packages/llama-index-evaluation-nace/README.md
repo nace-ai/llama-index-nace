@@ -4,10 +4,8 @@ Replace your LLM judge. LlamaIndex evaluators backed by Drex decision models fro
 
 ## Install
 
-Coming soon to PyPI (`pip install llama-index-evaluation-nace`). Install from source meanwhile:
-
 ```
-pip install "git+https://github.com/nace-ai/llama-index-nace#subdirectory=packages/llama-index-evaluation-nace"
+pip install llama-index-evaluation-nace
 ```
 
 Set `NACE_API_KEY`. Optional: `NACE_BASE_URL`, `NACE_DEFAULT_DECISION_MODEL`. For OpenRouter pass `base_url="https://openrouter.ai/api/v1"`.

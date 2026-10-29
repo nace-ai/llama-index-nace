@@ -35,7 +35,7 @@ One `choice` question whose options are the tools, one winner. On the default mo
 
 ## NaceMultiSelector
 
-One yes/no question per option, all in a single request. Options with `p >= threshold` (default 0.5) are returned best first, cut to `max_outputs`. The result is never empty: if nothing passes, the top option is returned with `fell_back=True`. Each option is one question, so the number of options is capped by Drex's per-request question limit. Drex enforces that limit itself and its refusal comes back as `NaceUnprocessableEntityError` with Drex's message; the package doesn't guess it, because it changes (Drex Max goes from 16 to 512 questions).
+One yes/no question per option, all in a single request. Options with `p >= threshold` (default 0.5) are returned best first, cut to `max_outputs`. The result is never empty: if nothing passes, the top option is returned with `fell_back=True`. Each option is one question, so the number of options is capped by Drex's per-request question limit. Drex enforces that limit itself and its refusal comes back as `NaceUnprocessableEntityError` with Drex's message; the package doesn't hardcode it. Drex Max currently accepts up to 512 questions per request, subject to the request-size and token limits.
 
 Known limitation: the default instruction asks whether each option is "needed". It is conservative on purely definitional questions (one live probe scored a docs tool 0.27 for "What does 429 mean?"), so the selector falls back to the top option. Lower `threshold`, or pass your own `instructions` (`{label}` and `{description}` are filled in).
 

@@ -137,7 +137,7 @@ def test_too_many_questions_refused(model: str) -> None:
 
 
 @pytest.mark.skipif(not OPENROUTER_KEY, reason="set OPENROUTER_API_KEY_LIVE to run")
-def test_openrouter_noul(record: Any) -> None:
+def test_openrouter_noul() -> None:
     drex = DrexClient(
         "llama-index-selectors-nace/live",
         api_key=OPENROUTER_KEY,
@@ -149,4 +149,5 @@ def test_openrouter_noul(record: Any) -> None:
     answer = response.answers["refund"]
     assert isinstance(answer, NoulAnswer)
     assert answer.noul > 0.7
-    record(response.model, response.request_id)
+    # OpenRouter answers with its own model id and doesn't pass Drex's request id through.
+    assert response.model.startswith("nace-ai/")

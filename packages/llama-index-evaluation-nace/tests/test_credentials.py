@@ -538,3 +538,53 @@ async def test_standalone_sdk_client_on_a_shared_client_is_untouched(
     redirecting(drex, "https://storage.example/v1/systemone")
     with pytest.raises(NaceRedirectError):
         await send(ours, asynchronous=asynchronous)
+
+
+def _jar_client(drex: FakeDrex, *, asynchronous: bool, **client_kwargs: Any) -> Any:
+    """A caller-supplied client holding a domain-less bypass cookie and an ordinary one."""
+    cls = httpx.AsyncClient if asynchronous else httpx.Client
+    transport = drex.async_transport() if asynchronous else drex.transport()
+    http = cls(transport=transport, **client_kwargs)
+    http.cookies.set("_vercel_jwt", "jwt-test")
+    http.cookies.set("session", "keep-me")
+    return http
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("via", ["jar", "client_header", "default_headers"])
+@pytest.mark.parametrize(
+    ("base_url", "kept"),
+    [("https://provider.example", False), ("https://console.nace.ai", True)],
+)
+async def test_bypass_cookie_only_reaches_nace_production(
+    ambient: None, drex: FakeDrex, asynchronous: bool, via: str, base_url: str, kept: bool
+) -> None:
+    cookie = "session=keep-me; _vercel_jwt=jwt-test; theme=dark"
+    options: dict[str, Any] = {"base_url": base_url, "api_key": PROVIDER}
+    client_kwargs: dict[str, Any] = {}
+    if via == "client_header":
+        client_kwargs["headers"] = {"Cookie": cookie}
+    if via == "default_headers":
+        options["default_headers"] = {"Cookie": cookie}
+    http = _jar_client(drex, asynchronous=asynchronous, **client_kwargs)
+    options["http_async_client" if asynchronous else "http_client"] = http
+    await send(build(drex, **options), asynchronous=asynchronous)
+    sent = drex.requests[0].headers.get("cookie", "")
+    assert ("_vercel_jwt=jwt-test" in sent) is kept
+    assert "session=keep-me" in sent
+    if via != "jar":
+        assert "theme=dark" in sent
+    # The caller's jar is not modified.
+    assert http.cookies.get("_vercel_jwt") == "jwt-test"
+    assert http.cookies.get("session") == "keep-me"
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_cookie_header_dropped_when_only_the_bypass_cookie_was_in_it(
+    ambient: None, drex: FakeDrex, asynchronous: bool
+) -> None:
+    http = _jar_client(drex, asynchronous=asynchronous, headers={"Cookie": "_vercel_jwt=jwt-test"})
+    options: dict[str, Any] = {"base_url": "https://provider.example", "api_key": PROVIDER}
+    options["http_async_client" if asynchronous else "http_client"] = http
+    await send(build(drex, **options), asynchronous=asynchronous)
+    assert "cookie" not in drex.requests[0].headers

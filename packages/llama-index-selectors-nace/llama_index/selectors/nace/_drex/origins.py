@@ -24,6 +24,7 @@ BYPASS_HEADERS = ("x-vercel-protection-bypass", "x-vercel-set-bypass-cookie")
 # `X-Nace-Client` values of requests this integration owns; the SDK-wide `X-Nace-SDK` header is
 # on every SDK request, including other users' clients that share an httpx client.
 OWNED_CLIENT_PREFIXES = ("llama-index-selectors-nace/", "llama-index-evaluation-nace/")
+BYPASS_COOKIES = frozenset({"_vercel_jwt"})
 _DEFAULT_PORTS = {"http": 80, "https": 443}
 
 _REFUSED_CUSTOM = (
@@ -172,6 +173,24 @@ def resolve_api_key(
     raise ValueError(_NO_KEY)
 
 
+def _strip_bypass_cookies(request: httpx.Request) -> None:
+    """Drop the bypass cookies from this request's `Cookie` header, nothing else.
+
+    Only the outgoing header changes; the caller's cookie jar is never touched.
+    """
+    header = request.headers.get("cookie")
+    if header is None:
+        return
+    pairs = [pair.strip() for pair in header.split(";") if pair.strip()]
+    kept = [pair for pair in pairs if pair.partition("=")[0].strip() not in BYPASS_COOKIES]
+    if len(kept) == len(pairs):
+        return
+    if kept:
+        request.headers["cookie"] = "; ".join(kept)
+    else:
+        del request.headers["cookie"]
+
+
 def guard_request(request: httpx.Request) -> None:
     """Request hook for every httpx client a `DrexClient` uses; sync and async share it.
 
@@ -183,8 +202,9 @@ def guard_request(request: httpx.Request) -> None:
     - Binds the request to the origin of its first hop: a later hop (a redirect) to another
       scheme, host or port, or to a URL with userinfo, is refused before it is sent, with the
       error the SDK itself raises, so credentials and the request body never leave.
-    - Removes the internal deployment headers from every request that isn't going to Nace
-      production, whatever put them there.
+    - Removes the internal deployment headers, and the Vercel bypass cookie from the `Cookie`
+      header (other cookies stay), from every request that isn't going to Nace production,
+      whatever put them there.
     - Sends the client name as `User-Agent` too; the SDK sets it as `X-Nace-Client`.
 
     Raises:
@@ -203,6 +223,7 @@ def guard_request(request: httpx.Request) -> None:
     if not is_nace_production(url):
         for header in BYPASS_HEADERS:
             request.headers.pop(header, None)
+        _strip_bypass_cookies(request)
     request.headers["User-Agent"] = name
 
 

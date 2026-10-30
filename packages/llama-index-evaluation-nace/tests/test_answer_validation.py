@@ -15,7 +15,8 @@ from llama_index.evaluation.nace._drex.client import DrexClient
 from llama_index.evaluation.nace._drex.errors import NaceAPIResponseValidationError
 
 MakeClient = Callable[..., DrexClient]
-PATH = r"answers\.(<answer>|q)"
+# The SDK rejects wrong types itself; its text is replaced by a fixed message.
+PATH = r"answers\.(<answer>|q)|could not be read"
 QUESTIONS = {"q": nace_sdk.Noul(instructions="ok?")}
 
 

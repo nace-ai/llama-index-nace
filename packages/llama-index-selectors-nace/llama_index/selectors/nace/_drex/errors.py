@@ -138,6 +138,7 @@ _BY_STATUS: dict[int, type[NaceAPIError]] = {
     529: NaceOverloadedError,
 }
 
+_INVALID_RESPONSE = "Drex answered 200 with a response body that could not be read."
 _MESSAGE_KEYS = ("error", "message", "detail")
 
 
@@ -197,7 +198,8 @@ def convert_error(error: Exception) -> Exception:
     if isinstance(error, nace_sdk.NaceAPIConnectionError):
         return NaceAPIConnectionError(str(error))
     if isinstance(error, nace_sdk.NaceAPIResponseValidationError):
-        return NaceAPIResponseValidationError(str(error))
+        # The SDK's text names the response's answer and field; send a fixed message instead.
+        return NaceAPIResponseValidationError(_INVALID_RESPONSE)
     if isinstance(error, nace_sdk.NaceAPIError):
         cls = _BY_STATUS.get(error.status)
         if cls is None:

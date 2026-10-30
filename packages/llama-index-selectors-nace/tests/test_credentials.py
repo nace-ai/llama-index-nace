@@ -556,3 +556,43 @@ async def test_cookie_header_dropped_when_only_the_bypass_cookie_was_in_it(
     options["http_async_client" if asynchronous else "http_client"] = http
     await send(build(drex, **options), asynchronous=asynchronous)
     assert "cookie" not in drex.requests[0].headers
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    ("base_url", "target"),
+    [
+        ("https://provider.example", "https://provider.example:0/moved"),
+        ("http://onprem.example", "http://onprem.example:0/moved"),
+    ],
+)
+async def test_redirect_to_port_zero_is_a_different_origin(
+    ambient: None, drex: FakeDrex, base_url: str, target: str, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    client = build(
+        drex,
+        base_url=base_url,
+        api_key=PROVIDER,
+        http_client=sync_http,
+        http_async_client=async_http,
+    )
+    redirecting(drex, target)
+    with pytest.raises(NaceRedirectError, match="different origin"):
+        await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 1
+
+
+@pytest.mark.parametrize("via", ["argument", "environment"])
+@pytest.mark.parametrize("url", ["https://provider.example:0", "http://127.0.0.1:0/service"])
+def test_port_zero_base_url_refused(
+    monkeypatch: pytest.MonkeyPatch, drex: FakeDrex, url: str, via: str
+) -> None:
+    kwargs: dict[str, Any] = {"api_key": PROVIDER}
+    if via == "argument":
+        kwargs["base_url"] = url
+    else:
+        monkeypatch.setenv("NACE_BASE_URL", url)
+    with pytest.raises(ValueError, match="absolute http"):
+        build(drex, **kwargs)
+    assert drex.requests == []

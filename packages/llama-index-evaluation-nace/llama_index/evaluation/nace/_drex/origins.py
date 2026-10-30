@@ -104,7 +104,8 @@ def _normalize(url: str) -> str:
     scheme = parts.scheme.lower()
     host = _host(parts.hostname)
     if (
-        scheme not in {"http", "https"}
+        port == 0
+        or scheme not in {"http", "https"}
         or not host
         or "@" in parts.netloc
         or parts.query
@@ -216,7 +217,9 @@ def guard_request(request: httpx.Request) -> None:
         return
     url = request.url
     scheme = url.scheme.lower()
-    origin = (scheme, _host(url.host), url.port or _DEFAULT_PORTS.get(scheme))
+    # Only a missing port takes the scheme's default; port 0 is a different origin.
+    port = url.port if url.port is not None else _DEFAULT_PORTS.get(scheme)
+    origin = (scheme, _host(url.host), port)
     first = request.extensions.setdefault(ORIGIN_EXTENSION, origin)
     if origin != first or url.userinfo:
         raise nace_sdk.NaceError(REDIRECT_MESSAGE)

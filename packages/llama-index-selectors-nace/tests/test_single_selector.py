@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from fakes import FakeDrex, error
+from fakes import FakeDrex, error, ok_body
 from llama_index.core.base.base_selector import SingleSelection
 from llama_index.core.llms import MockLLM
 from llama_index.core.prompts import PromptTemplate
@@ -21,7 +21,10 @@ from llama_index.selectors.nace import (
     NaceSingleSelector,
 )
 from llama_index.selectors.nace._drex.client import DrexClient
-from llama_index.selectors.nace._drex.errors import NaceInternalServerError
+from llama_index.selectors.nace._drex.errors import (
+    NaceAPIResponseValidationError,
+    NaceInternalServerError,
+)
 from llama_index.selectors.nace.base import DEFAULT_SINGLE_INSTRUCTIONS, option_labels
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -263,3 +266,63 @@ def test_empty_description_sent_as_null(drex: FakeDrex, make_client: MakeClient)
     choices = [ToolMetadata(name="a", description=""), ToolMetadata(name="b", description="B")]
     NaceSingleSelector(client=make_client()).select(choices, "q")
     assert drex.bodies[0]["questions"]["route"]["criteria"] == {"a": None, "b": "B"}
+
+
+@pytest.mark.parametrize("value", [-1, True, "0", 1.0])
+def test_default_index_must_be_a_non_negative_int(value: Any) -> None:
+    with pytest.raises(ValueError, match="default_index"):
+        NaceSingleSelector(default_index=value, api_key="nace_sk_test")
+
+
+def test_default_index_out_of_range_refused_before_request(
+    drex: FakeDrex, make_client: MakeClient
+) -> None:
+    selector = NaceSingleSelector(client=make_client(), default_index=2)
+    with pytest.raises(ValueError, match="default_index"):
+        selector.select(CHOICES, "q")
+    with pytest.raises(ValueError, match="default_index"):
+        asyncio.run(selector.aselect(CHOICES, "q"))
+    assert drex.requests == []
+
+
+def test_router_query_engine_never_gets_an_out_of_range_index(
+    drex: FakeDrex, make_client: MakeClient
+) -> None:
+    drex.replies = [error(503, "down")] * 3
+    tools = [QueryEngineTool(query_engine=Marker(name=c.name or ""), metadata=c) for c in CHOICES]
+    router = RouterQueryEngine(
+        selector=NaceSingleSelector(client=make_client(), default_index=7),
+        query_engine_tools=tools,
+        llm=MockLLM(),
+        summarizer=None,
+    )
+    with pytest.raises(ValueError, match="default_index"):
+        router.query("q")
+
+
+def test_missing_answer_is_a_validation_error(drex: FakeDrex, make_client: MakeClient) -> None:
+    drex.replies.append(lambda body: (200, {}, {**ok_body(body), "answers": {}}))
+    with pytest.raises(NaceAPIResponseValidationError) as info:
+        NaceSingleSelector(client=make_client()).select(CHOICES, "q")
+    assert isinstance(info.value, NaceError)
+
+
+def test_choice_outside_options_is_a_validation_error(
+    drex: FakeDrex, make_client: MakeClient
+) -> None:
+    drex.overrides = reply("zzz", {"zzz": 1.0})
+    with pytest.raises(NaceAPIResponseValidationError):
+        NaceSingleSelector(client=make_client()).select(CHOICES, "q")
+
+
+def test_nan_probability_cannot_bypass_min_confidence(
+    drex: FakeDrex, make_client: MakeClient
+) -> None:
+    raw = (
+        b'{"model":"m","usage":{},"answers":{"route":{"type":"choice","choice":"docs",'
+        b'"confidence":0.9,"probabilities":{"docs":NaN,"sql":0.1}}}}'
+    )
+    drex.replies = [(200, {}, raw)]
+    selector = NaceSingleSelector(client=make_client(), min_confidence=0.9)
+    with pytest.raises(NaceAPIResponseValidationError):
+        selector.select(CHOICES, "q")

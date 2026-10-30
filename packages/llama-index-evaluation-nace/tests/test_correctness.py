@@ -7,6 +7,7 @@ from fakes import FakeDrex, ok_body
 from llama_index.core.base.response.schema import Response
 from llama_index.evaluation.nace import NaceCorrectnessEvaluator, NaceEvaluationResult
 from llama_index.evaluation.nace._drex.client import DrexClient
+from llama_index.evaluation.nace._drex.errors import NaceAPIResponseValidationError
 
 MakeClient = Callable[..., DrexClient]
 PROBS = {"0": 0.0, "1": 0.05, "2": 0.13, "3": 0.6, "4": 0.22}
@@ -103,19 +104,56 @@ def test_instructions_overridable(drex: FakeDrex, make_client: MakeClient) -> No
     assert drex.bodies[0]["questions"]["evaluate"]["instructions"] == "Custom?"
 
 
-def test_unexpected_answer_type(drex: FakeDrex, make_client: MakeClient) -> None:
+def test_unexpected_answer_type_is_a_validation_error(
+    drex: FakeDrex, make_client: MakeClient
+) -> None:
     from llama_index.evaluation.nace import NaceError
 
     drex.overrides = {"evaluate": {"type": "noul", "noul": 0.5}}
-    with pytest.raises(NaceError, match="unexpected answer type") as info:
+    with pytest.raises(NaceAPIResponseValidationError, match="unexpected answer type") as info:
         NaceCorrectnessEvaluator(client=make_client()).evaluate(query="q", response="r")
+    assert isinstance(info.value, NaceError)
     assert not isinstance(info.value, ValueError)
 
 
-def test_missing_answer_is_nace_error(drex: FakeDrex, make_client: MakeClient) -> None:
+def test_missing_answer_is_a_validation_error(drex: FakeDrex, make_client: MakeClient) -> None:
     from llama_index.evaluation.nace import NaceError
 
     drex.replies.append(lambda body: (200, {}, {**ok_body(body), "answers": {}}))
-    with pytest.raises(NaceError, match="no answer") as info:
+    with pytest.raises(NaceAPIResponseValidationError, match="no answer") as info:
         NaceCorrectnessEvaluator(client=make_client()).evaluate(query="q", response="r")
+    assert isinstance(info.value, NaceError)
     assert not isinstance(info.value, KeyError | ValueError)
+
+
+@pytest.mark.parametrize("threshold", [0.5, 5.5, float("nan")])
+def test_score_threshold_must_be_on_the_scale(threshold: float) -> None:
+    with pytest.raises(ValueError, match="score_threshold"):
+        NaceCorrectnessEvaluator(score_threshold=threshold, api_key="nace_sk_test")
+
+
+@pytest.mark.parametrize("threshold", [1, 5])
+def test_score_threshold_bounds_are_accepted(threshold: float) -> None:
+    NaceCorrectnessEvaluator(score_threshold=threshold, api_key="nace_sk_test")
+
+
+@pytest.mark.parametrize(
+    ("expected", "probs", "field"),
+    [(4.5, None, "score"), (1.0, {"0": 0.5, "5": 0.5}, "probabilities")],
+)
+def test_correctness_score_outside_levels(
+    drex: FakeDrex,
+    make_client: MakeClient,
+    expected: float,
+    probs: dict[str, float] | None,
+    field: str,
+) -> None:
+    drex.overrides = score(expected, probs)
+    with pytest.raises(NaceAPIResponseValidationError, match=rf"answers\.evaluate\.{field}"):
+        NaceCorrectnessEvaluator(client=make_client()).evaluate(query="q", response="r")
+
+
+def test_correctness_score_upper_levels_accepted(drex: FakeDrex, make_client: MakeClient) -> None:
+    drex.overrides = score(4.0, {str(i): 0.2 for i in range(5)})
+    result = NaceCorrectnessEvaluator(client=make_client()).evaluate(query="q", response="r")
+    assert result.score == pytest.approx(5.0)

@@ -13,7 +13,7 @@ from llama_index.core.prompts.mixin import PromptDictType
 
 from ._drex.answers import ChoiceAnswer, DrexResponse, NoulAnswer, RawAnswer, ScoreAnswer, Usage
 from ._drex.client import DrexClient
-from ._drex.errors import NaceError
+from ._drex.errors import NaceAPIResponseValidationError
 from ._drex.images import to_drex_image
 from ._images import split_sources
 from ._version import __version__
@@ -28,7 +28,8 @@ def answer_of(response: DrexResponse, kind: type[_Answer]) -> _Answer:
     """The evaluation answer, checked to be of `kind`.
 
     Raises:
-        NaceError: Drex's response has no answer to the question, or one of another type.
+        NaceAPIResponseValidationError: Drex's response has no answer to the question, or
+            one of another type.
 
     """
     answer: NoulAnswer | ChoiceAnswer | ScoreAnswer | RawAnswer | None = response.answers.get(
@@ -36,10 +37,10 @@ def answer_of(response: DrexResponse, kind: type[_Answer]) -> _Answer:
     )
     if answer is None:
         message = "Drex's response has no answer to the evaluation question."
-        raise NaceError(message)
+        raise NaceAPIResponseValidationError(message)
     if not isinstance(answer, kind):
         message = "Drex returned an unexpected answer type."
-        raise NaceError(message)
+        raise NaceAPIResponseValidationError(message)
     return answer
 
 

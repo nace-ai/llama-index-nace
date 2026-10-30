@@ -17,6 +17,7 @@ from ._drex.client import DrexClient
 from ._drex.errors import (
     NaceAPIConnectionError,
     NaceAPIError,
+    NaceAPIResponseValidationError,
     NaceError,
     NaceInternalServerError,
     NaceLowConfidenceError,
@@ -65,6 +66,14 @@ def _check_choices(choices: Sequence[ToolMetadata]) -> None:
 def _check_probability(name: str, value: float) -> None:
     if not 0.0 <= value <= 1.0:
         message = f"{name} must be between 0 and 1 (got {value})."
+        raise ValueError(message)
+
+
+def _check_default_index(default_index: int | None) -> None:
+    if default_index is None:
+        return
+    if isinstance(default_index, bool) or not isinstance(default_index, int) or default_index < 0:
+        message = f"default_index must be a non-negative integer (got {default_index!r})."
         raise ValueError(message)
 
 
@@ -120,11 +129,13 @@ class NaceSingleSelector(_NaceSelector):
         """Create the selector.
 
         Raises:
-            ValueError: `min_confidence` is outside 0..1.
+            ValueError: `min_confidence` is outside 0..1 or `default_index` is not a
+                non-negative integer.
 
         """
         if min_confidence is not None:
             _check_probability("min_confidence", min_confidence)
+        _check_default_index(default_index)
         super().__init__(instructions, client, **client_kwargs)
         self._min_confidence = min_confidence
         self._default_index = default_index
@@ -138,6 +149,11 @@ class NaceSingleSelector(_NaceSelector):
         self, choices: Sequence[ToolMetadata], query: QueryBundle
     ) -> tuple[dict[str, nace_sdk.Choice], list[str], list[str]]:
         _check_choices(choices)
+        if self._default_index is not None and self._default_index >= len(choices):
+            message = (
+                f"default_index={self._default_index} is out of range for {len(choices)} choices."
+            )
+            raise ValueError(message)
         labels = option_labels(choices)
         question = nace_sdk.Choice(
             instructions=self._instructions.format(),
@@ -190,7 +206,7 @@ class NaceSingleSelector(_NaceSelector):
         answer = response.answers.get(QUESTION_ID)
         if not isinstance(answer, ChoiceAnswer) or answer.choice not in labels:
             message = "Drex's answer doesn't match any of the options."
-            raise NaceError(message)
+            raise NaceAPIResponseValidationError(message)
         index = labels.index(answer.choice)
         top = answer.probabilities.get(answer.choice, answer.confidence)
         fell_back = False
@@ -297,7 +313,7 @@ class NaceMultiSelector(_NaceSelector):
             answer = response.answers.get(label)
             if not isinstance(answer, NoulAnswer):
                 message = "Drex's answers don't match the options."
-                raise NaceError(message)
+                raise NaceAPIResponseValidationError(message)
             probabilities[label] = answer.noul
         ranked = sorted(range(len(labels)), key=lambda i: -probabilities[labels[i]])
         chosen = [i for i in ranked if probabilities[labels[i]] >= self._threshold]

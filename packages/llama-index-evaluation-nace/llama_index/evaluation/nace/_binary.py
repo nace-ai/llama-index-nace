@@ -26,7 +26,15 @@ class BinaryEvaluator(NaceEvaluator):
         raise_error: bool = False,
         **kwargs: Any,
     ) -> None:
-        """Create the evaluator; `kwargs` go to `NaceEvaluator`."""
+        """Create the evaluator; `kwargs` go to `NaceEvaluator`.
+
+        Raises:
+            ValueError: `threshold` is not between 0 and 1.
+
+        """
+        if not 0.0 <= threshold <= 1.0:
+            message = f"threshold must be between 0 and 1 (got {threshold})."
+            raise ValueError(message)
         super().__init__(instructions=instructions, **kwargs)
         self._threshold = threshold
         self._raise_error = raise_error

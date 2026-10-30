@@ -1,7 +1,15 @@
-# llama-index-nace
+<p align="center">
+  <a href="https://nace.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="https://console.nace.ai/brand/nace-logo-white.svg"><img src="https://console.nace.ai/brand/nace-logo-black.svg" alt="Nace" height="40"></picture></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://www.llamaindex.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/run-llama/.github/1dbae62d04e42b27e15972bf295078c43aa56c63/logos/llamaindex-light.png"><img src="https://raw.githubusercontent.com/run-llama/.github/1dbae62d04e42b27e15972bf295078c43aa56c63/logos/llamaindex-dark.png" alt="LlamaIndex" height="40"></picture></a>
+</p>
 
-[![CI](https://img.shields.io/github/actions/workflow/status/nace-ai/llama-index-nace/ci.yml?branch=main&label=CI&logo=github)](https://github.com/nace-ai/llama-index-nace/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/nace-ai/llama-index-nace/blob/main/LICENSE)
+<h1 align="center">Drex for LlamaIndex</h1>
+
+<p align="center">
+  <a href="https://github.com/nace-ai/llama-index-nace/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/nace-ai/llama-index-nace/ci.yml?branch=main&amp;label=CI&amp;logo=github" alt="CI status"></a>
+  <a href="https://github.com/nace-ai/llama-index-nace/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p>
 
 LlamaIndex integrations for [Nace](https://nace.ai)'s Drex decision models. Drex scores the options and returns calibrated probabilities instead of writing text that gets parsed.
 

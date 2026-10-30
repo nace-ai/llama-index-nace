@@ -1,4 +1,12 @@
-# llama-index-evaluation-nace
+<p align="center">
+  <a href="https://nace.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="https://console.nace.ai/brand/nace-logo-white.svg"><img src="https://console.nace.ai/brand/nace-logo-black.svg" alt="Nace" height="40"></picture></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://www.llamaindex.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/run-llama/.github/1dbae62d04e42b27e15972bf295078c43aa56c63/logos/llamaindex-light.png"><img src="https://raw.githubusercontent.com/run-llama/.github/1dbae62d04e42b27e15972bf295078c43aa56c63/logos/llamaindex-dark.png" alt="LlamaIndex" height="40"></picture></a>
+</p>
+
+<h1 align="center">Drex for LlamaIndex</h1>
+
+<p align="center"><code>llama-index-evaluation-nace</code></p>
 
 Replace your LLM judge. LlamaIndex evaluators backed by Drex decision models from [Nace](https://nace.ai): Drex returns probabilities, not text that has to be parsed.
 

@@ -101,7 +101,18 @@ class _NaceSelector(BaseSelector):
         super().__init__()
         _check_client(client)
         self._instructions = PromptTemplate(instructions)
+        self._owns_client = client is None
         self._client = client if client is not None else DrexClient(CLIENT_NAME, **client_kwargs)
+
+    def close(self) -> None:
+        """Close the HTTP client this object created; a supplied `client` stays open."""
+        if self._owns_client:
+            self._client.close()
+
+    async def aclose(self) -> None:
+        """Close the HTTP clients this object created; a supplied `client` stays open."""
+        if self._owns_client:
+            await self._client.aclose()
 
     def _get_prompts(self) -> PromptDictType:
         return {"instructions": self._instructions}

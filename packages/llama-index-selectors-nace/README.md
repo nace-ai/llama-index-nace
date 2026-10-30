@@ -51,6 +51,10 @@ Known limitation: the default instruction asks whether each option is "needed". 
 
 Both return `NaceSelectorResult` with `probabilities` (by label), `labels`, `confidence`, `model`, `request_id`, `usage` and `fell_back`. Labels are tool names when all are present and unique, otherwise `option_1 ... option_n`.
 
+## Closing
+
+Call `close()` (or `await aclose()`) to release the HTTP connections a selector opened; a `client=` you passed in stays open.
+
 ## Images
 
 If `QueryBundle.image_path` is set, the image is sent. The default model, `drex-max-v1.1`, reads images; when `NACE_DEFAULT_DECISION_MODEL` names a text-only model, image queries still go to `drex-max-v1.1`. An explicit text-only `model=` with an image raises `NaceImageModelError`. A missing file raises `NaceImageError` before any request.

@@ -102,13 +102,14 @@ class DrexClient:
             raise ValueError(message)
         resolved_key = resolve_api_key(api_key, destination, openrouter=self.openrouter)
 
-        headers = dict(default_headers or {})
+        # `httpx.Headers` keeps repeated fields (a `dict` would comma-join repeated `Cookie` ones).
+        headers = httpx.Headers(default_headers)
         if self.openrouter:
             headers.setdefault("HTTP-Referer", "https://nace.ai")
             headers.setdefault("X-OpenRouter-Title", "Drex for LlamaIndex")
         # The hook below recognizes this integration's requests by this marker, not by the
         # caller-chosen client name; a caller header of that name never replaces it.
-        headers = {k: v for k, v in headers.items() if k.lower() != INTEGRATION_HEADER.lower()}
+        headers.pop(INTEGRATION_HEADER, None)
         headers[INTEGRATION_HEADER] = INTEGRATION_MARKER
         self._owns_http = http_client is None
         self._owns_async_http = http_async_client is None

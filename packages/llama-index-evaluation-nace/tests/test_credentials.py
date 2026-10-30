@@ -884,3 +884,71 @@ async def test_cookie_filtering_keeps_other_headers_in_order_and_case(asynchrono
         (b"Cookie", b"a=1; b=2"),
         (b"X-Last", b"3"),
     ]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    "fields",
+    [["session=ok", "_vercel_jwt=jwt-test"], ["_vercel_jwt=jwt-test", "session=ok"]],
+)
+async def test_repeated_cookie_fields_in_default_headers_stay_separate(
+    ambient: None, drex: FakeDrex, asynchronous: bool, fields: list[str]
+) -> None:
+    client = build(
+        drex,
+        base_url="https://provider.example",
+        api_key=PROVIDER,
+        default_headers=httpx.Headers([("Cookie", field) for field in fields]),
+    )
+    await send(client, asynchronous=asynchronous)
+    sent = drex.requests[0].headers.get_list("cookie")
+    assert "_vercel_jwt" not in " ".join(sent)
+    assert sent == ["session=ok"]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_repeated_cookie_fields_in_default_headers_kept_for_nace_production(
+    ambient: None, drex: FakeDrex, asynchronous: bool
+) -> None:
+    headers = httpx.Headers([("Cookie", "session=ok"), ("Cookie", "_vercel_jwt=jwt-test")])
+    await send(build(drex, default_headers=headers), asynchronous=asynchronous)
+    assert drex.requests[0].headers.get_list("cookie") == ["session=ok", "_vercel_jwt=jwt-test"]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_plain_dict_default_headers_cookie_is_filtered(
+    ambient: None, drex: FakeDrex, asynchronous: bool
+) -> None:
+    client = build(
+        drex,
+        base_url="https://provider.example",
+        api_key=PROVIDER,
+        default_headers={"Cookie": "session=ok; _vercel_jwt=jwt-test"},
+    )
+    await send(client, asynchronous=asynchronous)
+    assert drex.requests[0].headers.get_list("cookie") == ["session=ok"]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (b"session=ok, _vercel_jwt=jwt-test", [b"session=ok"]),
+        (b"_vercel_jwt=jwt-test, session=ok", [b"session=ok"]),
+        (b"a=1; _vercel_jwt=jwt-test, b=2", [b"a=1; b=2"]),
+        (b"_vercel_jwt=jwt-test", []),
+    ],
+)
+async def test_comma_joined_cookie_field_is_filtered(
+    asynchronous: bool, value: bytes, expected: list[bytes]
+) -> None:
+    request = httpx.Request(
+        "POST",
+        "https://provider.example/v1/systemone",
+        headers=[(b"X-Nace-Integration", b"llama-index-nace"), (b"Cookie", value)],
+    )
+    if asynchronous:
+        await aguard_request(request)
+    else:
+        guard_request(request)
+    assert [v for n, v in request.headers.raw if n.lower() == b"cookie"] == expected

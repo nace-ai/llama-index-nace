@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import ipaddress
 import os
+import re
 from typing import Literal, NamedTuple
 from urllib.parse import urlsplit, urlunsplit
 
@@ -200,15 +201,16 @@ def _strip_bypass_cookies(request: httpx.Request) -> None:
 
     Works on the raw `(name, value)` byte pairs, so every other header keeps its bytes, name case
     and position (a caller header may hold non-ASCII bytes). Each `Cookie` field is filtered on
-    its own, other cookies keep their field, and a field left empty is removed. A field with no
-    bypass cookie is left byte-for-byte. Only the outgoing header changes; the caller's cookie
-    jar is never touched.
+    its own, with pairs split on `;` and `,`; other cookies keep their field, and a field left
+    empty is removed. A field with no bypass cookie is left byte-for-byte. Only the outgoing
+    header changes; the caller's cookie jar is never touched.
     """
     raw = request.headers.raw
     rebuilt: list[tuple[bytes, bytes]] = []
     for name, value in raw:
         if name.lower() == b"cookie":
-            pairs = [pair.strip() for pair in value.split(b";") if pair.strip()]
+            # `,` too: a cookie value can't hold one, and a joined repeated field uses it
+            pairs = [pair.strip() for pair in re.split(rb"[;,]", value) if pair.strip()]
             kept = [
                 pair
                 for pair in pairs

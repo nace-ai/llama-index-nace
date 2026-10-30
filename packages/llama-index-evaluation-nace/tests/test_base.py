@@ -117,6 +117,13 @@ def test_image_urls_kwarg_data_url_ok_http_refused(drex: FakeDrex, make_client: 
     assert len(drex.bodies) == 1
 
 
+def test_image_urls_refuse_file_paths(drex: FakeDrex, make_client: MakeClient) -> None:
+    probe = Probe(client=make_client())
+    with pytest.raises(NaceImageError, match="image_paths"):
+        probe.evaluate(query="q", response="r", image_urls=[str(FIXTURES / "red.png")])
+    assert drex.bodies == []
+
+
 def test_missing_image_path_raises_before_request(drex: FakeDrex, make_client: MakeClient) -> None:
     with pytest.raises(NaceImageError):
         Probe(client=make_client()).evaluate(query="q", image_paths=["/no/such.png"])

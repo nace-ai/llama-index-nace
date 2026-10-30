@@ -15,7 +15,7 @@ from ._drex.answers import ChoiceAnswer, DrexResponse, NoulAnswer, RawAnswer, Sc
 from ._drex.client import DrexClient
 from ._drex.errors import NaceAPIResponseValidationError
 from ._drex.images import to_drex_image
-from ._images import split_sources
+from ._images import image_url, split_sources
 from ._version import __version__
 
 CLIENT_NAME = f"llama-index-evaluation-nace/{__version__}"
@@ -169,8 +169,8 @@ class NaceEvaluator(BaseEvaluator):
         image_paths: Sequence[Any] | None,
         image_urls: Sequence[str] | None,
     ) -> list[Any]:
-        items = [*(images or ()), *(image_paths or ()), *(image_urls or ())]
-        return [to_drex_image(item) for item in items]
+        items = [*(images or ()), *(image_paths or ())]
+        return [*(to_drex_image(item) for item in items), *(image_url(u) for u in image_urls or ())]
 
     def _request(
         self,

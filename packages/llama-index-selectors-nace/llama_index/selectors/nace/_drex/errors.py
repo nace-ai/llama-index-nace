@@ -11,6 +11,7 @@ import httpx
 import nace_sdk
 
 BILLING_URL = "https://console.nace.ai/dashboard/billing"
+OPENROUTER_CREDITS_URL = "https://openrouter.ai/settings/credits"
 # The text of the SDK error raised when an API redirect changes origin (nace-sdk 0.6.2 raises it
 # itself; `origins.guard_request` raises it on older SDKs).
 REDIRECT_MESSAGE = "Refusing an API redirect to a different origin"
@@ -172,7 +173,7 @@ def _clip(text: str, budget: int) -> str:
     return text[: max(0, budget - 1)] + "…"
 
 
-def _message(error: nace_sdk.NaceAPIError) -> str:
+def _message(error: nace_sdk.NaceAPIError, openrouter: bool = False) -> str:
     detail = _safe_detail(error)
     text = f"Drex returned {error.status}" + (f": {detail}" if detail else "")
     lines = [
@@ -184,15 +185,22 @@ def _message(error: nace_sdk.NaceAPIError) -> str:
     # Recovery guidance is kept whole when it fits; only the descriptive text is cut.
     guidance = ""
     if error.status == 402:
-        guidance += f"\nAdd funds at {BILLING_URL}"
+        guidance += (
+            f"\nAdd credits at {OPENROUTER_CREDITS_URL}"
+            if openrouter
+            else f"\nAdd funds at {BILLING_URL}"
+        )
     if error.request_id:
         guidance += f"\n(request_id={error.request_id})"
     guidance = _clip(guidance, 300)
     return _clip(text, MAX_MESSAGE_CHARS - len(guidance)) + guidance
 
 
-def convert_error(error: Exception) -> Exception:
-    """Map an `nace_sdk` error to this package's error classes."""
+def convert_error(error: Exception, *, openrouter: bool = False) -> Exception:
+    """Map an `nace_sdk` error to this package's error classes.
+
+    `openrouter` makes a 402 point to OpenRouter's credits page instead of Nace billing.
+    """
     if isinstance(error, nace_sdk.NaceAPITimeoutError):
         return NaceAPITimeoutError(str(error))
     if isinstance(error, nace_sdk.NaceAPIConnectionError):
@@ -204,7 +212,7 @@ def convert_error(error: Exception) -> Exception:
         cls = _BY_STATUS.get(error.status)
         if cls is None:
             cls = NaceInternalServerError if error.status >= 500 else NaceAPIError
-        return cls(error, _message(error))
+        return cls(error, _message(error, openrouter))
     if isinstance(error, nace_sdk.NaceError) and str(error).startswith(REDIRECT_MESSAGE):
         return NaceRedirectError(_REDIRECT_DETAIL)
     if isinstance(error, nace_sdk.NaceError):
@@ -214,6 +222,7 @@ def convert_error(error: Exception) -> Exception:
 
 __all__ = [
     "BILLING_URL",
+    "OPENROUTER_CREDITS_URL",
     "REDIRECT_MESSAGE",
     "NaceAPIConnectionError",
     "NaceAPIError",

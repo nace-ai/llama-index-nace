@@ -199,7 +199,9 @@ class DrexClient:
         try:
             result = self._client.system_one(**call)
         except nace_sdk.NaceError as error:
-            raise convert_error(error) from _cause(error)
+            raise convert_error(error, openrouter=is_openrouter_host(self.base_url)) from _cause(
+                error
+            )
         return _response(result)
 
     async def aask(
@@ -214,7 +216,9 @@ class DrexClient:
         try:
             result = await self._aclient.system_one(**call)
         except nace_sdk.NaceError as error:
-            raise convert_error(error) from _cause(error)
+            raise convert_error(error, openrouter=is_openrouter_host(self.base_url)) from _cause(
+                error
+            )
         return _response(result)
 
     def _prepare(

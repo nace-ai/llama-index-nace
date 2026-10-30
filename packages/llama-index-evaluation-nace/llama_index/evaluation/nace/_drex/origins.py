@@ -10,7 +10,6 @@ from __future__ import annotations
 import contextlib
 import ipaddress
 import os
-import re
 from typing import Literal, NamedTuple
 from urllib.parse import urlsplit, urlunsplit
 
@@ -208,30 +207,69 @@ def resolve_api_key(
     raise ValueError(_NO_KEY)
 
 
+def _cookie_segments(value: bytes) -> list[tuple[bytes, bytes]]:
+    """Split a `Cookie` field into `(pair, separator)` at `;` and `,` outside double quotes.
+
+    The pieces joined back give `value` again, byte for byte.
+    """
+    segments: list[tuple[bytes, bytes]] = []
+    start = 0
+    quoted = False
+    escaped = False
+    for index, byte in enumerate(value):
+        char = bytes((byte,))
+        if quoted and escaped:
+            escaped = False
+        elif quoted and char == b"\\":
+            escaped = True
+        elif char == b'"':
+            quoted = not quoted
+        elif char in {b";", b","} and not quoted:
+            segments.append((value[start:index], char))
+            start = index + 1
+    segments.append((value[start:], b""))
+    return segments
+
+
+def _without_bypass_cookies(value: bytes) -> bytes | None:
+    """`value` minus its bypass-cookie pairs, every other byte unchanged; None if nothing is left.
+
+    A pair is removed together with the separator after it (or before it, when it is last).
+    """
+    segments = _cookie_segments(value)
+    drop = [
+        pair.partition(b"=")[0].strip().decode("latin-1") in BYPASS_COOKIES for pair, _ in segments
+    ]
+    if not any(drop):
+        return value
+    kept = [segment for segment, dropped in zip(segments, drop, strict=True) if not dropped]
+    if not kept:
+        return None
+    text = b"".join(pair + sep for pair, sep in kept[:-1])
+    text += kept[-1][0] if drop[-1] else kept[-1][0] + kept[-1][1]
+    if drop[0]:
+        text = text.lstrip()
+    return text if text.strip() else None
+
+
 def _strip_bypass_cookies(request: httpx.Request) -> None:
     """Drop the bypass cookies from this request's `Cookie` fields, nothing else.
 
     Works on the raw `(name, value)` byte pairs, so every other header keeps its bytes, name case
     and position (a caller header may hold non-ASCII bytes). Each `Cookie` field is filtered on
-    its own, with pairs split on `;` and `,`; other cookies keep their field, and a field left
-    empty is removed. A field with no bypass cookie is left byte-for-byte. Only the outgoing
-    header changes; the caller's cookie jar is never touched.
+    its own; its pairs end at `;` or `,` outside double quotes (a joined repeated field uses a
+    comma). Only the `_vercel_jwt=<value>` pairs are cut out: every other byte of the field,
+    including quoted values with commas or semicolons, is left as it was, and a field left empty
+    is removed. Only the outgoing header changes; the caller's cookie jar is never touched.
     """
     raw = request.headers.raw
     rebuilt: list[tuple[bytes, bytes]] = []
     for name, value in raw:
         if name.lower() == b"cookie":
-            # `,` too: a cookie value can't hold one, and a joined repeated field uses it
-            pairs = [pair.strip() for pair in re.split(rb"[;,]", value) if pair.strip()]
-            kept = [
-                pair
-                for pair in pairs
-                if pair.partition(b"=")[0].strip().decode("latin-1") not in BYPASS_COOKIES
-            ]
-            if len(kept) != len(pairs):
-                if not kept:
-                    continue
-                value = b"; ".join(kept)
+            filtered = _without_bypass_cookies(value)
+            if filtered is None:
+                continue
+            value = filtered
         rebuilt.append((name, value))
     if rebuilt != raw:
         request.headers = httpx.Headers(rebuilt)

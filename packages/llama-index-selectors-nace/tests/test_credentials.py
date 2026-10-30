@@ -1028,3 +1028,35 @@ async def test_same_literal_redirect_keeps_authorization(
     for request in drex.requests:
         assert request.headers["authorization"] == f"Bearer {PROVIDER}"
     assert client.base_url == literal
+
+
+# --- other cookies are never re-assembled ------------------------------------------------------
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (b'prefs="a,b"; _vercel_jwt=token', [b'prefs="a,b"']),
+        (b'_vercel_jwt=token; prefs="a,b"', [b'prefs="a,b"']),
+        (b'prefs="a;b",x=1, _vercel_jwt=token', [b'prefs="a;b",x=1']),
+        (b'_vercel_jwt="t;o,k"; prefs="a, b"', [b'prefs="a, b"']),
+        (b'a="x\\"; _vercel_jwt=no"; _vercel_jwt=t', [b'a="x\\"; _vercel_jwt=no"']),
+        (b'prefs="a,b";   other=1', [b'prefs="a,b";   other=1']),
+        (b'  prefs="a,b" ;c=d  ', [b'  prefs="a,b" ;c=d  ']),
+        (b'_vercel_jwt="t,k"', []),
+    ],
+)
+async def test_other_cookies_keep_their_bytes(
+    asynchronous: bool, value: bytes, expected: list[bytes]
+) -> None:
+    request = httpx.Request(
+        "POST",
+        "https://provider.example/v1/systemone",
+        headers=[(b"X-Nace-Integration", b"llama-index-nace"), (b"Cookie", value)],
+    )
+    if asynchronous:
+        await aguard_request(request)
+    else:
+        guard_request(request)
+    assert [v for n, v in request.headers.raw if n.lower() == b"cookie"] == expected

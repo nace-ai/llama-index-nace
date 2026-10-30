@@ -77,6 +77,15 @@ def is_openrouter_host(url: str | None) -> bool:
     return parsed is not None and parsed[1] == OPENROUTER_HOST
 
 
+def is_openrouter_production(url: str | None) -> bool:
+    """Whether `url` is https on port 443 of `openrouter.ai`, where its ambient key may go."""
+    parsed = _split(str(url)) if url else None
+    if parsed is None:
+        return False
+    scheme, host, port = parsed
+    return scheme == "https" and host == OPENROUTER_HOST and port in {None, 443}
+
+
 def _normalize(url: str) -> str:
     """Validate `url` and return it with a lower-case host and no trailing slash.
 
@@ -130,7 +139,9 @@ def resolve_api_key(api_key: str | None, destination: Destination) -> str:
 
     - An explicit `api_key` always wins; a blank one is refused, never replaced from the
       environment.
-    - OpenRouter only ever gets `OPENROUTER_API_KEY`.
+    - OpenRouter only ever gets `OPENROUTER_API_KEY`, and that ambient key only goes to
+      `https://openrouter.ai` on port 443; the same host over another scheme or port needs an
+      explicit `api_key`.
     - Nace production gets `NACE_API_KEY`, else legacy `DREX_API_KEY`.
     - Another origin gets that same pair only when the operator chose it through the
       environment (`NACE_BASE_URL` / `DREX_BASE_URL`); a `base_url=` argument needs `api_key=`.
@@ -144,7 +155,7 @@ def resolve_api_key(api_key: str | None, destination: Destination) -> str:
             raise ValueError(_BLANK_KEY)
         return api_key.strip()
     if is_openrouter_host(destination.url):
-        if key := _env("OPENROUTER_API_KEY"):
+        if is_openrouter_production(destination.url) and (key := _env("OPENROUTER_API_KEY")):
             return key
         raise ValueError(_OPENROUTER_KEY)
     if destination.source == "argument" and not is_nace_production(destination.url):

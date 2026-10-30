@@ -432,3 +432,36 @@ async def test_two_packages_share_one_client(
     assert type(theirs.value) is selectors_errors.NaceRedirectError
     assert len(sync_http.event_hooks["request"]) == 2
     assert len(async_http.event_hooks["request"]) == 2
+
+
+@pytest.mark.parametrize("via", ["argument", "environment"])
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://openrouter.ai/api/v1",
+        "https://openrouter.ai:8443/api/v1",
+        "http://openrouter.ai:443/api/v1",
+    ],
+)
+def test_openrouter_key_only_for_https_443(
+    monkeypatch: pytest.MonkeyPatch, drex: FakeDrex, url: str, via: str
+) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", OPENROUTER_KEY)
+    kwargs: dict[str, Any] = {}
+    if via == "argument":
+        kwargs["base_url"] = url
+    else:
+        monkeypatch.setenv("NACE_BASE_URL", url)
+    with pytest.raises(ValueError, match="api_key"):
+        build(drex, **kwargs)
+    assert drex.requests == []
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_openrouter_key_for_explicit_https_443(
+    monkeypatch: pytest.MonkeyPatch, drex: FakeDrex, asynchronous: bool
+) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", OPENROUTER_KEY)
+    client = build(drex, base_url="https://OpenRouter.ai.:443/api/v1")
+    await send(client, asynchronous=asynchronous)
+    assert bearer(drex) == f"Bearer {OPENROUTER_KEY}"

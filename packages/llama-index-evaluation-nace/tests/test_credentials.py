@@ -743,3 +743,93 @@ async def test_integration_marker_cannot_be_overridden_by_default_headers(
     with pytest.raises(NaceRedirectError, match="different origin"):
         await send(client, asynchronous=asynchronous)
     assert drex.requests[0].headers.get_list("x-nace-integration") == ["llama-index-nace"]
+
+
+@pytest.mark.skipif(
+    tuple(int(part) for part in version("nace-sdk").split(".")[:3]) >= (0, 6, 2),
+    reason="nace-sdk 0.6.2+ compares origins itself and does not equate other spellings",
+)
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    ("base_url", "target"),
+    [
+        ("http://[::1]:8000", "http://[0:0:0:0:0:0:0:1]:8000/moved/v1/systemone"),
+        ("http://[0:0:0:0:0:0:0:1]:8000", "http://[::1]:8000/moved/v1/systemone"),
+        ("http://[2001:DB8::A]:8000", "http://[2001:0db8:0:0:0:0:0:000a]:8000/moved"),
+        ("http://[::ffff:127.0.0.1]:8000", "http://[0:0:0:0:0:ffff:7f00:1]:8000/moved"),
+    ],
+)
+async def test_same_origin_redirect_between_ip_literal_spellings_is_allowed(
+    drex: FakeDrex, base_url: str, target: str, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    client = build(
+        drex,
+        base_url=base_url,
+        api_key=PROVIDER,
+        http_client=sync_http,
+        http_async_client=async_http,
+    )
+    redirecting(drex, target)
+    await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 2
+    assert drex.requests[1].url.path.startswith("/moved")
+
+
+@pytest.mark.skipif(
+    tuple(int(part) for part in version("nace-sdk").split(".")[:3]) >= (0, 6, 2),
+    reason="nace-sdk 0.6.2+ compares origins itself and does not equate zone-id spellings",
+)
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_same_origin_redirect_keeps_zone_id_with_expanded_address(
+    drex: FakeDrex, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    client = build(
+        drex,
+        base_url="http://[fe80::1%25MyVPN]:8000",
+        api_key=PROVIDER,
+        http_client=sync_http,
+        http_async_client=async_http,
+    )
+    redirecting(drex, "http://[FE80:0:0:0:0:0:0:1%25MyVPN]:8000/moved")
+    await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 2
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    ("base_url", "target"),
+    [
+        ("http://[::1]:8000", "http://[0:0:0:0:0:0:0:2]:8000/moved"),
+        ("http://[::1]:8000", "http://[0:0:0:0:0:0:0:1]:8001/moved"),
+        ("http://[::ffff:127.0.0.1]:8000", "http://[0:0:0:0:0:ffff:7f00:2]:8000/moved"),
+    ],
+)
+async def test_redirect_to_another_ip_address_is_still_refused(
+    drex: FakeDrex, base_url: str, target: str, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    client = build(
+        drex,
+        base_url=base_url,
+        api_key=PROVIDER,
+        http_client=sync_http,
+        http_async_client=async_http,
+    )
+    redirecting(drex, target)
+    with pytest.raises(NaceRedirectError, match="different origin"):
+        await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 1
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_ipv6_literal_base_url_is_built_in_compressed_form(
+    drex: FakeDrex, asynchronous: bool
+) -> None:
+    client = build(
+        drex, base_url="http://[2001:0DB8:0:0:0:0:0:000A%25MyVPN]:8000/s", api_key=PROVIDER
+    )
+    assert client.base_url == "http://[2001:db8::a%25MyVPN]:8000/s"
+    await send(client, asynchronous=asynchronous)
+    assert "MyVPN" in str(drex.requests[0].url)

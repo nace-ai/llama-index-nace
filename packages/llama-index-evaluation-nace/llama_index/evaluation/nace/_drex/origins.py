@@ -7,6 +7,8 @@ environment.
 
 from __future__ import annotations
 
+import contextlib
+import ipaddress
 import os
 from typing import Literal, NamedTuple
 from urllib.parse import urlsplit, urlunsplit
@@ -55,12 +57,16 @@ def _env(name: str) -> str:
 
 
 def _host(hostname: str | None) -> str:
-    """Lower-case a DNS name or IPv6 address and drop a trailing dot, keeping an IPv6 zone id.
+    """Canonical form of a host: lower-case, no trailing dot, IP literals in compressed form.
 
-    The interface name after `%` is case-sensitive.
+    `[0:0:0:0:0:0:0:1]` and `[::1]` (and an IPv4-mapped address in either spelling) are one
+    origin. The interface name after `%` of an IPv6 zone id is case-sensitive and kept as given.
     """
     address, percent, zone = (hostname or "").partition("%")
-    return address.lower().rstrip(".") + percent + zone
+    address = address.lower().rstrip(".")
+    with contextlib.suppress(ValueError):  # a DNS name
+        address = ipaddress.ip_address(address).compressed
+    return address + percent + zone
 
 
 def _netloc_host(netloc: str) -> str:

@@ -5,7 +5,7 @@ from collections.abc import Callable
 from typing import Any
 
 import pytest
-from fakes import FakeDrex
+from fakes import FakeDrex, ok_body
 from llama_index.core.base.base_retriever import BaseRetriever
 from llama_index.core.llms import MockLLM
 from llama_index.core.query_engine import CustomQueryEngine, RouterQueryEngine
@@ -14,6 +14,7 @@ from llama_index.core.schema import NodeWithScore, QueryBundle, TextNode
 from llama_index.core.tools import QueryEngineTool, RetrieverTool, ToolMetadata
 from llama_index.selectors.nace import NaceMultiSelector, NaceSelectorResult
 from llama_index.selectors.nace._drex.client import DrexClient
+from llama_index.selectors.nace._drex.errors import NaceAPIResponseValidationError
 from llama_index.selectors.nace.base import DEFAULT_MULTI_INSTRUCTIONS
 
 MakeClient = Callable[..., DrexClient]
@@ -204,3 +205,20 @@ def test_missing_description_not_rendered_as_none(drex: FakeDrex, make_client: M
     instructions = drex.bodies[0]["questions"]["a"]["instructions"]
     assert "None" not in instructions
     assert instructions == DEFAULT_MULTI_INSTRUCTIONS.format(label="a", description="")
+
+
+def test_missing_answer_is_a_validation_error(drex: FakeDrex, make_client: MakeClient) -> None:
+    from llama_index.selectors.nace import NaceError
+
+    drex.replies.append(lambda body: (200, {}, {**ok_body(body), "answers": {}}))
+    with pytest.raises(NaceAPIResponseValidationError) as info:
+        NaceMultiSelector(client=make_client()).select(TOOLS, "q")
+    assert isinstance(info.value, NaceError)
+
+
+def test_wrong_answer_type_is_a_validation_error(drex: FakeDrex, make_client: MakeClient) -> None:
+    drex.overrides = {
+        "a": {"type": "choice", "choice": "a", "confidence": 1.0, "probabilities": {"a": 1.0}}
+    }
+    with pytest.raises(NaceAPIResponseValidationError):
+        NaceMultiSelector(client=make_client()).select(TOOLS, "q")

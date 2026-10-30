@@ -16,6 +16,7 @@ from llama_index.evaluation.nace import (
     NaceRelevancyEvaluator,
 )
 from llama_index.evaluation.nace._drex.client import DrexClient
+from llama_index.evaluation.nace._drex.errors import NaceAPIResponseValidationError
 
 MakeClient = Callable[..., DrexClient]
 RED = (Path(__file__).parent / "fixtures" / "red.png").read_bytes()
@@ -145,14 +146,14 @@ def test_prompts_roundtrip(drex: FakeDrex, make_client: MakeClient) -> None:
 
 
 @pytest.mark.parametrize("evaluator_cls", [NaceFaithfulnessEvaluator, NaceRelevancyEvaluator])
-def test_missing_or_wrong_answer_is_nace_error(
+def test_missing_or_wrong_answer_is_a_validation_error(
     drex: FakeDrex, make_client: MakeClient, evaluator_cls: type
 ) -> None:
     from llama_index.evaluation.nace import NaceError
 
     evaluator = evaluator_cls(client=make_client())
     drex.replies.append(lambda body: (200, {}, {**ok_body(body), "answers": {}}))
-    with pytest.raises(NaceError, match="no answer") as info:
+    with pytest.raises(NaceAPIResponseValidationError, match="no answer") as info:
         evaluator.evaluate(query="q", response="r", contexts=["c"])
     assert not isinstance(info.value, KeyError | ValueError)
     drex.overrides = {
@@ -163,6 +164,14 @@ def test_missing_or_wrong_answer_is_nace_error(
             "probabilities": {"a": 1.0},
         }
     }
-    with pytest.raises(NaceError, match="unexpected answer type") as info:
+    with pytest.raises(NaceAPIResponseValidationError, match="unexpected answer type") as info:
         evaluator.evaluate(query="q", response="r", contexts=["c"])
+    assert isinstance(info.value, NaceError)
     assert not isinstance(info.value, ValueError)
+
+
+@pytest.mark.parametrize("evaluator_cls", [NaceFaithfulnessEvaluator, NaceRelevancyEvaluator])
+@pytest.mark.parametrize("threshold", [-0.1, 1.5, float("nan")])
+def test_threshold_must_be_a_probability(evaluator_cls: type, threshold: float) -> None:
+    with pytest.raises(ValueError, match="threshold"):
+        evaluator_cls(threshold=threshold, api_key="nace_sk_test")

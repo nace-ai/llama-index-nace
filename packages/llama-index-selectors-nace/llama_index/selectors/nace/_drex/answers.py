@@ -5,14 +5,18 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+from .errors import NaceAPIResponseValidationError
+
+Probability = Annotated[float, Field(strict=True, ge=0.0, le=1.0, allow_inf_nan=False)]
 
 
 class NoulAnswer(BaseModel):
     """Probability that the answer to a yes/no question is yes."""
 
     type: Literal["noul"] = "noul"
-    noul: float
+    noul: Probability
 
 
 class ChoiceAnswer(BaseModel):
@@ -20,18 +24,18 @@ class ChoiceAnswer(BaseModel):
 
     type: Literal["choice"] = "choice"
     choice: str
-    confidence: float | None = None
-    probabilities: dict[str, float] = Field(default_factory=dict)
+    confidence: Probability | None = None
+    probabilities: dict[str, Probability] = Field(default_factory=dict)
 
 
 class ScoreAnswer(BaseModel):
     """Expected score with its rubric and level probabilities."""
 
     type: Literal["score"] = "score"
-    score: float
+    score: Annotated[float, Field(strict=True, ge=0.0, allow_inf_nan=False)]
     legend: dict[int, str] = Field(default_factory=dict)
-    probabilities: dict[int, float] = Field(default_factory=dict)
-    confidence: float | None = None
+    probabilities: dict[int, Probability] = Field(default_factory=dict)
+    confidence: Probability | None = None
 
 
 class RawAnswer(BaseModel):
@@ -56,6 +60,21 @@ class Usage(BaseModel):
     image_tokens: int | None = None
 
 
+MAX_MESSAGE_CHARS = 200
+# The only path segments an error message may name: this package's own schema fields. Every
+# other segment (dict keys, list indexes) comes from the response and is replaced.
+_SCHEMA_FIELDS = frozenset(
+    name for model in (NoulAnswer, ChoiceAnswer, ScoreAnswer, Usage) for name in model.model_fields
+)
+
+
+def _safe_path(loc: tuple[int | str, ...]) -> str:
+    """Render a pydantic error location naming schema fields only, never response keys."""
+    return "".join(
+        f".{part}" if isinstance(part, str) and part in _SCHEMA_FIELDS else ".<key>" for part in loc
+    )
+
+
 class DrexResponse(BaseModel):
     """Answers and metadata from one Drex request."""
 
@@ -69,7 +88,18 @@ class DrexResponse(BaseModel):
     @classmethod
     def from_body(cls, body: Mapping[str, Any], request_id: str | None) -> DrexResponse:
         """Build a response from a Drex response body, keeping unknown answer types."""
-        answers = {name: _parse_answer(raw) for name, raw in (body.get("answers") or {}).items()}
+        answers: dict[str, NoulAnswer | ChoiceAnswer | ScoreAnswer | RawAnswer] = {}
+        for name, raw in (body.get("answers") or {}).items():
+            invalid: str | None = None
+            try:
+                answers[name] = _parse_answer(raw)
+            except ValidationError as error:
+                first = error.errors()[0]["loc"] if error.errors() else ()
+                invalid = _safe_path(first)
+            # Raised outside the `except` so no exception context (and no value) is attached.
+            if invalid is not None:
+                message = f"Drex returned an invalid answer at answers.<answer>{invalid}."
+                raise NaceAPIResponseValidationError(message[:MAX_MESSAGE_CHARS])
         return cls(
             model=str(body.get("model", "")),
             answers=answers,

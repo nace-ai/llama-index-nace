@@ -68,8 +68,10 @@ def test_client_built_from_kwargs() -> None:
     assert probe._client.model == "drex-v2.0"
 
 
-def test_state_drops_none() -> None:
-    state = Probe(client=object())._build_state("q", None, ["c"], {"reference": None, "x": "y"})  # type: ignore[arg-type]
+def test_state_drops_none(make_client: MakeClient) -> None:
+    state = Probe(client=make_client())._build_state(
+        "q", None, ["c"], {"reference": None, "x": "y"}
+    )
     assert state == {"query": "q", "context": ["c"], "x": "y"}
 
 
@@ -113,6 +115,13 @@ def test_image_urls_kwarg_data_url_ok_http_refused(drex: FakeDrex, make_client: 
     with pytest.raises(NaceImageError, match="doesn't fetch"):
         probe.evaluate(query="q", response="r", image_urls=["https://x.test/a.png"])
     assert len(drex.bodies) == 1
+
+
+def test_image_urls_refuse_file_paths(drex: FakeDrex, make_client: MakeClient) -> None:
+    probe = Probe(client=make_client())
+    with pytest.raises(NaceImageError, match="image_paths"):
+        probe.evaluate(query="q", response="r", image_urls=[str(FIXTURES / "red.png")])
+    assert drex.bodies == []
 
 
 def test_missing_image_path_raises_before_request(drex: FakeDrex, make_client: MakeClient) -> None:

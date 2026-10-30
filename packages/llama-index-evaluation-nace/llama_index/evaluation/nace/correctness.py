@@ -8,6 +8,7 @@ from typing import Any
 import nace_sdk
 
 from ._drex.answers import DrexResponse, ScoreAnswer
+from ._drex.errors import NaceAPIResponseValidationError
 from .base import NaceEvaluationResult, NaceEvaluator, _Request, answer_of
 
 INSTRUCTIONS = (
@@ -38,7 +39,17 @@ class NaceCorrectnessEvaluator(NaceEvaluator):
     """
 
     def __init__(self, *, score_threshold: float = 4.0, **kwargs: Any) -> None:
-        """Create the evaluator."""
+        """Create the evaluator.
+
+        Raises:
+            ValueError: `score_threshold` is not between 1 and 5.
+
+        """
+        if not 1.0 <= score_threshold <= len(LEVELS):
+            message = (
+                f"score_threshold must be between 1 and {len(LEVELS)} (got {score_threshold})."
+            )
+            raise ValueError(message)
         super().__init__(instructions=INSTRUCTIONS, **kwargs)
         self._score_threshold = score_threshold
 
@@ -71,6 +82,12 @@ class NaceCorrectnessEvaluator(NaceEvaluator):
         contexts: Sequence[str] | None,
     ) -> NaceEvaluationResult:
         answer = answer_of(response, ScoreAnswer)
+        if answer.score > len(LEVELS) - 1:
+            message = "Drex returned an invalid answer at answers.evaluate.score."
+            raise NaceAPIResponseValidationError(message)
+        if any(level >= len(LEVELS) or level < 0 for level in answer.probabilities):
+            message = "Drex returned an invalid answer at answers.evaluate.probabilities."
+            raise NaceAPIResponseValidationError(message)
         score = 1 + answer.score
         p_ge4 = sum(p for level, p in answer.probabilities.items() if level >= len(LEVELS) - 2)
         return NaceEvaluationResult(

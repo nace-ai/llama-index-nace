@@ -82,6 +82,9 @@ class FakeDrex:
             else:
                 status, headers, payload = reply
             headers = {"x-request-id": "req_test", **headers}
+            if isinstance(payload, bytes):
+                headers = {"content-type": "application/json", **headers}
+                return httpx.Response(status, content=payload, headers=headers)
             return httpx.Response(status, json=payload, headers=headers)
         finally:
             with self._lock:

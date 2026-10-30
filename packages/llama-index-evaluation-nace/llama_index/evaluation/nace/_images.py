@@ -13,6 +13,17 @@ from ._drex.images import as_data_url, to_drex_image
 MAX_IMAGES = 8
 
 
+def image_url(value: str) -> str | dict[str, Any]:
+    """Convert an image URL string; only `data:` URLs are accepted, never a file path.
+
+    `http(s)` URLs go to the shared converter, which refuses them with its own message.
+    """
+    if not value.startswith(("data:", "http://", "https://")):
+        message = "image_urls take data: URLs; pass files as image_paths."
+        raise NaceImageError(message)
+    return to_drex_image(value)
+
+
 def _node_image(node: ImageNode) -> str | dict[str, Any]:
     if node.image:
         if node.image.startswith("data:"):
@@ -23,7 +34,7 @@ def _node_image(node: ImageNode) -> str | dict[str, Any]:
     if node.image_path:
         return to_drex_image(node.image_path)
     if node.image_url:
-        return to_drex_image(node.image_url)
+        return image_url(node.image_url)
     message = "An ImageNode in the sources has no image, image_path or image_url."
     raise NaceImageError(message)
 

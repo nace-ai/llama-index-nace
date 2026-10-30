@@ -17,6 +17,7 @@ from ._drex.client import DrexClient
 from ._drex.errors import (
     NaceAPIConnectionError,
     NaceAPIError,
+    NaceAPIResponseValidationError,
     NaceError,
     NaceInternalServerError,
     NaceLowConfidenceError,
@@ -68,6 +69,14 @@ def _check_probability(name: str, value: float) -> None:
         raise ValueError(message)
 
 
+def _check_default_index(default_index: int | None) -> None:
+    if default_index is None:
+        return
+    if isinstance(default_index, bool) or not isinstance(default_index, int) or default_index < 0:
+        message = f"default_index must be a non-negative integer (got {default_index!r})."
+        raise ValueError(message)
+
+
 def _query_images(query: QueryBundle) -> list[str]:
     return [query.image_path] if query.image_path else []
 
@@ -76,13 +85,34 @@ def _p(value: float) -> str:
     return f"{value:.2f}"
 
 
+def _check_client(client: object) -> None:
+    if client is not None and not isinstance(client, DrexClient):
+        message = (
+            "client must be this package's DrexClient; build one per package or pass "
+            "api_key/base_url instead."
+        )
+        raise TypeError(message)
+
+
 class _NaceSelector(BaseSelector):
     """Shared plumbing: the Drex client and the editable `instructions` prompt."""
 
     def __init__(self, instructions: str, client: DrexClient | None, **client_kwargs: Any) -> None:
         super().__init__()
+        _check_client(client)
         self._instructions = PromptTemplate(instructions)
+        self._owns_client = client is None
         self._client = client if client is not None else DrexClient(CLIENT_NAME, **client_kwargs)
+
+    def close(self) -> None:
+        """Close the HTTP client this object created; a supplied `client` stays open."""
+        if self._owns_client:
+            self._client.close()
+
+    async def aclose(self) -> None:
+        """Close the HTTP clients this object created; a supplied `client` stays open."""
+        if self._owns_client:
+            await self._client.aclose()
 
     def _get_prompts(self) -> PromptDictType:
         return {"instructions": self._instructions}
@@ -120,11 +150,13 @@ class NaceSingleSelector(_NaceSelector):
         """Create the selector.
 
         Raises:
-            ValueError: `min_confidence` is outside 0..1.
+            ValueError: `min_confidence` is outside 0..1 or `default_index` is not a
+                non-negative integer.
 
         """
         if min_confidence is not None:
             _check_probability("min_confidence", min_confidence)
+        _check_default_index(default_index)
         super().__init__(instructions, client, **client_kwargs)
         self._min_confidence = min_confidence
         self._default_index = default_index
@@ -138,6 +170,11 @@ class NaceSingleSelector(_NaceSelector):
         self, choices: Sequence[ToolMetadata], query: QueryBundle
     ) -> tuple[dict[str, nace_sdk.Choice], list[str], list[str]]:
         _check_choices(choices)
+        if self._default_index is not None and self._default_index >= len(choices):
+            message = (
+                f"default_index={self._default_index} is out of range for {len(choices)} choices."
+            )
+            raise ValueError(message)
         labels = option_labels(choices)
         question = nace_sdk.Choice(
             instructions=self._instructions.format(),
@@ -190,7 +227,7 @@ class NaceSingleSelector(_NaceSelector):
         answer = response.answers.get(QUESTION_ID)
         if not isinstance(answer, ChoiceAnswer) or answer.choice not in labels:
             message = "Drex's answer doesn't match any of the options."
-            raise NaceError(message)
+            raise NaceAPIResponseValidationError(message)
         index = labels.index(answer.choice)
         top = answer.probabilities.get(answer.choice, answer.confidence)
         fell_back = False
@@ -297,7 +334,7 @@ class NaceMultiSelector(_NaceSelector):
             answer = response.answers.get(label)
             if not isinstance(answer, NoulAnswer):
                 message = "Drex's answers don't match the options."
-                raise NaceError(message)
+                raise NaceAPIResponseValidationError(message)
             probabilities[label] = answer.noul
         ranked = sorted(range(len(labels)), key=lambda i: -probabilities[labels[i]])
         chosen = [i for i in ranked if probabilities[labels[i]] >= self._threshold]

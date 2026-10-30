@@ -3,6 +3,7 @@ import nace_sdk
 import pytest
 from llama_index.selectors.nace._drex.errors import (
     BILLING_URL,
+    MAX_MESSAGE_CHARS,
     NaceAPIConnectionError,
     NaceAPIError,
     NaceAPITimeoutError,
@@ -144,3 +145,37 @@ def test_sdk_redirect_refusal_maps_to_redirect_error():
     other = convert_error(nace_sdk.NaceError("other"))
     assert type(other) is NaceError
     assert not isinstance(other, NaceRedirectError)
+
+
+@pytest.mark.parametrize(
+    "issues",
+    [
+        [{"path": "q", "message": "x" * 100_000}],
+        [{"path": f"q{i}", "message": "invalid"} for i in range(1000)],
+    ],
+)
+def test_structured_issues_have_a_total_budget(issues):
+    original = sdk_error(422, {"error": {"message": "invalid", "issues": issues}})
+    err = convert_error(original)
+    assert len(str(err)) <= MAX_MESSAGE_CHARS
+    assert "…" in str(err)
+    assert err.issues == original.issues
+    assert err.body == original.body
+
+
+def test_long_errors_keep_recovery_guidance():
+    original = sdk_error(402, {"error": {"message": "y" * 5000}}, request_id="req_support")
+    err = convert_error(original)
+    assert BILLING_URL in str(err)
+    assert "request_id=req_support" in str(err)
+    assert len(str(err)) <= MAX_MESSAGE_CHARS
+
+
+def test_short_errors_unchanged():
+    assert str(convert_error(sdk_error(402))) == (
+        f"Drex returned 402: nope\nAdd funds at {BILLING_URL}\n(request_id=req_1)"
+    )
+    body = {"error": {"message": "invalid", "issues": [{"path": "model", "message": "unknown"}]}}
+    assert str(convert_error(sdk_error(422, body))) == (
+        "Drex returned 422: invalid\n  model: unknown\n(request_id=req_1)"
+    )

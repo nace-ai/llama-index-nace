@@ -13,9 +13,9 @@ from llama_index.core.prompts.mixin import PromptDictType
 
 from ._drex.answers import ChoiceAnswer, DrexResponse, NoulAnswer, RawAnswer, ScoreAnswer, Usage
 from ._drex.client import DrexClient
-from ._drex.errors import NaceError
+from ._drex.errors import NaceAPIResponseValidationError
 from ._drex.images import to_drex_image
-from ._images import split_sources
+from ._images import image_url, split_sources
 from ._version import __version__
 
 CLIENT_NAME = f"llama-index-evaluation-nace/{__version__}"
@@ -28,7 +28,8 @@ def answer_of(response: DrexResponse, kind: type[_Answer]) -> _Answer:
     """The evaluation answer, checked to be of `kind`.
 
     Raises:
-        NaceError: Drex's response has no answer to the question, or one of another type.
+        NaceAPIResponseValidationError: Drex's response has no answer to the question, or
+            one of another type.
 
     """
     answer: NoulAnswer | ChoiceAnswer | ScoreAnswer | RawAnswer | None = response.answers.get(
@@ -36,10 +37,10 @@ def answer_of(response: DrexResponse, kind: type[_Answer]) -> _Answer:
     )
     if answer is None:
         message = "Drex's response has no answer to the evaluation question."
-        raise NaceError(message)
+        raise NaceAPIResponseValidationError(message)
     if not isinstance(answer, kind):
         message = "Drex returned an unexpected answer type."
-        raise NaceError(message)
+        raise NaceAPIResponseValidationError(message)
     return answer
 
 
@@ -102,9 +103,26 @@ class NaceEvaluator(BaseEvaluator):
         if max_images is not None and max_images < 1:
             message = f"max_images must be at least 1 (got {max_images})."
             raise ValueError(message)
+        if client is not None and not isinstance(client, DrexClient):
+            message = (
+                "client must be this package's DrexClient; build one per package or pass "
+                "api_key/base_url instead."
+            )
+            raise TypeError(message)
         self._instructions = PromptTemplate(instructions)
         self._max_images = max_images
+        self._owns_client = client is None
         self._client = client if client is not None else DrexClient(CLIENT_NAME, **client_kwargs)
+
+    def close(self) -> None:
+        """Close the HTTP client this object created; a supplied `client` stays open."""
+        if self._owns_client:
+            self._client.close()
+
+    async def aclose(self) -> None:
+        """Close the HTTP clients this object created; a supplied `client` stays open."""
+        if self._owns_client:
+            await self._client.aclose()
 
     def _get_prompts(self) -> PromptDictType:
         return {"instructions": self._instructions}
@@ -151,8 +169,8 @@ class NaceEvaluator(BaseEvaluator):
         image_paths: Sequence[Any] | None,
         image_urls: Sequence[str] | None,
     ) -> list[Any]:
-        items = [*(images or ()), *(image_paths or ()), *(image_urls or ())]
-        return [to_drex_image(item) for item in items]
+        items = [*(images or ()), *(image_paths or ())]
+        return [*(to_drex_image(item) for item in items), *(image_url(u) for u in image_urls or ())]
 
     def _request(
         self,

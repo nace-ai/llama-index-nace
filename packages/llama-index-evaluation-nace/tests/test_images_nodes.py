@@ -43,6 +43,12 @@ def test_http_image_url_refused() -> None:
         split_sources([scored(node)], max_images=None)
 
 
+def test_image_node_url_refuses_file_paths() -> None:
+    node = ImageNode(image_url=str(FIXTURES / "red.png"))
+    with pytest.raises(NaceImageError, match="image_paths"):
+        split_sources([scored(node)], max_images=None)
+
+
 def test_image_node_without_source_refused() -> None:
     with pytest.raises(NaceImageError, match="no image"):
         split_sources([scored(ImageNode(text="caption"))], max_images=None)

@@ -30,6 +30,30 @@ Each package installs on its own too.
 
 Set `NACE_API_KEY`. The default model is `drex-max-v1.1` (text and images; `nace-ai/drex-max` on OpenRouter, which doesn't list v1.1 yet); pass `model=` or set `NACE_DEFAULT_DECISION_MODEL` to use another, such as `drex-v2.0`.
 
+## Backends and credentials
+
+| Backend | Configuration | Key |
+|---|---|---|
+| Nace (default) | nothing, or `base_url="https://console.nace.ai"` | `NACE_API_KEY` |
+| OpenRouter | `base_url="https://openrouter.ai/api/v1"` | `OPENROUTER_API_KEY`, or `api_key=`; never `NACE_API_KEY` |
+| On-prem or another host | set `NACE_BASE_URL` and `NACE_API_KEY` together, or pass both `base_url=` and that provider's `api_key=` | the key you set for that host |
+
+```python
+import os
+
+from llama_index.evaluation.nace import NaceFaithfulnessEvaluator
+
+evaluator = NaceFaithfulnessEvaluator(
+    base_url="https://openrouter.ai/api/v1", api_key=os.environ["OPENROUTER_API_KEY"]
+)
+```
+
+- The legacy `DREX_API_KEY` and `DREX_BASE_URL` are read when the `NACE_` variable is unset or blank.
+- A custom `base_url=` without `api_key=` is refused before any request, so an ambient Nace key can't be sent to a host you named in code.
+- Internal deployment headers are only sent to `https://console.nace.ai` and `https://drex.nace.ai`.
+- When you pass `http_client` / `http_async_client`, Drex requests on them refuse redirects to another origin (scheme, host or port); your other requests on those clients are untouched.
+- Set `openrouter=True` for an OpenRouter-format host other than `openrouter.ai`, and pass its key as `api_key=`.
+
 ## Quick start
 
 ```python

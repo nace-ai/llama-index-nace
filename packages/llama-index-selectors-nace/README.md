@@ -16,7 +16,7 @@ LlamaIndex selectors backed by Drex decision models from [Nace](https://nace.ai)
 pip install llama-index-selectors-nace
 ```
 
-Set `NACE_API_KEY`. Optional: `NACE_BASE_URL`, `NACE_DEFAULT_DECISION_MODEL`. For OpenRouter pass `base_url="https://openrouter.ai/api/v1"`.
+Set `NACE_API_KEY`. Optional: `NACE_BASE_URL`, `NACE_DEFAULT_DECISION_MODEL`. For OpenRouter, pass `base_url="https://openrouter.ai/api/v1"` and set `OPENROUTER_API_KEY`. See *Backends and credentials* in the [repository README](https://github.com/nace-ai/llama-index-nace#backends-and-credentials).
 
 The default model is `drex-max-v1.1`. An explicit `model=` is sent exactly as given; without one, `NACE_DEFAULT_DECISION_MODEL` is used when set, else `drex-max-v1.1`. If that default is a text-only model (`drex-v1.5`, `drex-v2.0`) and the request has images, `drex-max-v1.1` is used for that request. OpenRouter doesn't list v1.1 yet, so there the default is the original Drex Max, `nace-ai/drex-max`.
 
@@ -35,7 +35,7 @@ router = RouterQueryEngine(
 
 Drex replaces the routing decision, not answer generation: the chosen engine still needs an LLM to write the answer, and with multi-select `RouterQueryEngine` uses an LLM to merge answers.
 
-Selectors also work on their own, in a `Workflow` branch (see `examples/workflow_branching.py`) and inside a running event loop such as Jupyter: `select()` is sync, `aselect()` is async.
+Selectors also work on their own, in a `Workflow` branch (see [`examples/workflow_branching.py`](https://github.com/nace-ai/llama-index-nace/blob/main/examples/workflow_branching.py)) and inside a running event loop such as Jupyter: `select()` is sync, `aselect()` is async.
 
 ## NaceSingleSelector
 
@@ -55,4 +55,4 @@ Both return `NaceSelectorResult` with `probabilities` (by label), `labels`, `con
 
 If `QueryBundle.image_path` is set, the image is sent. The default model, `drex-max-v1.1`, reads images; when `NACE_DEFAULT_DECISION_MODEL` names a text-only model, image queries still go to `drex-max-v1.1`. An explicit text-only `model=` with an image raises `NaceImageModelError`. A missing file raises `NaceImageError` before any request.
 
-See [`examples/`](../../examples) for runnable scripts and notebooks.
+See [`examples/`](https://github.com/nace-ai/llama-index-nace/tree/main/examples) for runnable scripts and notebooks.

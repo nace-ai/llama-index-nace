@@ -103,7 +103,8 @@ class NaceSingleSelector(_NaceSelector):
         default_index: The tool to use when Drex is unsure or unavailable (5xx, rate
             limit, connection errors).
         client: A prepared `DrexClient`. Otherwise one is built from `client_kwargs`
-            (`api_key`, `base_url`, `model`, `timeout`, ...).
+            (`api_key`, `base_url`, `model`, `timeout`, ...). A custom `base_url` needs the
+            provider's `api_key`; OpenRouter uses `OPENROUTER_API_KEY`.
 
     """
 
@@ -232,7 +233,9 @@ class NaceMultiSelector(_NaceSelector):
         instructions: Template for each question; `{label}` and `{description}` are filled.
         threshold: Lowest probability to select a tool.
         max_outputs: Keep at most this many tools.
-        client: A prepared `DrexClient`. Otherwise one is built from `client_kwargs`.
+        client: A prepared `DrexClient`. Otherwise one is built from `client_kwargs`
+            (`api_key`, `base_url`, `model`, `timeout`, ...). A custom `base_url` needs the
+            provider's `api_key`; OpenRouter uses `OPENROUTER_API_KEY`.
 
     """
 

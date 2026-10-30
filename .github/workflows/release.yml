@@ -49,6 +49,10 @@ jobs:
             exit 1
           fi
           echo "package=$package" >> "$GITHUB_OUTPUT"
+      - name: Run the package's offline tests
+        run: |
+          uv sync --all-packages --all-groups
+          uv run pytest "packages/${{ steps.pkg.outputs.package }}/tests" --rootdir "packages/${{ steps.pkg.outputs.package }}"
       - run: uv build --package "${{ steps.pkg.outputs.package }}" --out-dir dist
       - name: Wheel must not contain namespace __init__ files
         run: |

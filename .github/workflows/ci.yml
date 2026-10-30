@@ -65,4 +65,19 @@ jobs:
           done
       - if: matrix.name == 'newest'
         name: Types against the newest SDK
-        run: uv sync --all-packages --all-groups && uv run --with "nace-sdk${{ matrix.sdk }}" mypy
+        run: |
+          set -euo pipefail
+          # The lockfile pins nace-sdk 0.3.0 and `uv run --with 'nace-sdk>=...'` can reuse it,
+          # so resolve the newest release first and pin it exactly.
+          newest=$(uv run --isolated --no-project --refresh-package nace-sdk \
+            --python "${{ matrix.python }}" --with "nace-sdk${{ matrix.sdk }}" \
+            python -c "from importlib.metadata import version; print(version('nace-sdk'))")
+          echo "Newest nace-sdk: ${newest}"
+          uv sync --all-packages --all-groups
+          uv run --with "nace-sdk==${newest}" python -c "
+          from importlib.metadata import version
+          installed = version('nace-sdk')
+          print('mypy runs against nace-sdk', installed)
+          assert installed == '${newest}', installed
+          "
+          uv run --with "nace-sdk==${newest}" mypy

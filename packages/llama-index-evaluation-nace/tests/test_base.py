@@ -68,8 +68,10 @@ def test_client_built_from_kwargs() -> None:
     assert probe._client.model == "drex-v2.0"
 
 
-def test_state_drops_none() -> None:
-    state = Probe(client=object())._build_state("q", None, ["c"], {"reference": None, "x": "y"})  # type: ignore[arg-type]
+def test_state_drops_none(make_client: MakeClient) -> None:
+    state = Probe(client=make_client())._build_state(
+        "q", None, ["c"], {"reference": None, "x": "y"}
+    )
     assert state == {"query": "q", "context": ["c"], "x": "y"}
 
 

@@ -1,25 +1,51 @@
 """LlamaIndex selectors backed by Drex decision models from Nace."""
 
 from ._drex.errors import (
+    NaceAPIConnectionError,
     NaceAPIError,
+    NaceAPIResponseValidationError,
+    NaceAPITimeoutError,
+    NaceAuthenticationError,
+    NaceBadRequestError,
     NaceError,
     NaceImageError,
     NaceImageLimitError,
     NaceImageModelError,
+    NaceInsufficientCreditError,
+    NaceInternalServerError,
     NaceLowConfidenceError,
+    NaceNotFoundError,
+    NaceOverloadedError,
+    NacePermissionDeniedError,
+    NaceRateLimitError,
+    NaceRedirectError,
+    NaceUnprocessableEntityError,
 )
 from ._version import __version__
 from .base import NaceMultiSelector, NaceSelectorResult, NaceSingleSelector
 
 __all__ = [
+    "NaceAPIConnectionError",
     "NaceAPIError",
+    "NaceAPIResponseValidationError",
+    "NaceAPITimeoutError",
+    "NaceAuthenticationError",
+    "NaceBadRequestError",
     "NaceError",
     "NaceImageError",
     "NaceImageLimitError",
     "NaceImageModelError",
+    "NaceInsufficientCreditError",
+    "NaceInternalServerError",
     "NaceLowConfidenceError",
     "NaceMultiSelector",
+    "NaceNotFoundError",
+    "NaceOverloadedError",
+    "NacePermissionDeniedError",
+    "NaceRateLimitError",
+    "NaceRedirectError",
     "NaceSelectorResult",
     "NaceSingleSelector",
+    "NaceUnprocessableEntityError",
     "__version__",
 ]

@@ -85,11 +85,21 @@ def _p(value: float) -> str:
     return f"{value:.2f}"
 
 
+def _check_client(client: object) -> None:
+    if client is not None and not isinstance(client, DrexClient):
+        message = (
+            "client must be this package's DrexClient; build one per package or pass "
+            "api_key/base_url instead."
+        )
+        raise TypeError(message)
+
+
 class _NaceSelector(BaseSelector):
     """Shared plumbing: the Drex client and the editable `instructions` prompt."""
 
     def __init__(self, instructions: str, client: DrexClient | None, **client_kwargs: Any) -> None:
         super().__init__()
+        _check_client(client)
         self._instructions = PromptTemplate(instructions)
         self._client = client if client is not None else DrexClient(CLIENT_NAME, **client_kwargs)
 

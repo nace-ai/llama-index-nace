@@ -103,6 +103,12 @@ class NaceEvaluator(BaseEvaluator):
         if max_images is not None and max_images < 1:
             message = f"max_images must be at least 1 (got {max_images})."
             raise ValueError(message)
+        if client is not None and not isinstance(client, DrexClient):
+            message = (
+                "client must be this package's DrexClient; build one per package or pass "
+                "api_key/base_url instead."
+            )
+            raise TypeError(message)
         self._instructions = PromptTemplate(instructions)
         self._max_images = max_images
         self._client = client if client is not None else DrexClient(CLIENT_NAME, **client_kwargs)

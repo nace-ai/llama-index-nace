@@ -53,14 +53,27 @@ def _env(name: str) -> str:
 
 
 def _host(hostname: str | None) -> str:
-    return (hostname or "").lower().rstrip(".")
+    """Lower-case a DNS name or IPv6 address and drop a trailing dot, keeping an IPv6 zone id.
+
+    The interface name after `%` is case-sensitive.
+    """
+    address, percent, zone = (hostname or "").partition("%")
+    return address.lower().rstrip(".") + percent + zone
+
+
+def _netloc_host(netloc: str) -> str:
+    """The host part of `netloc`, case untouched (`urlsplit().hostname` lower-cases it all)."""
+    host = netloc.rpartition("@")[2]
+    if host.startswith("["):
+        return host[1:].partition("]")[0]
+    return host.partition(":")[0]
 
 
 def _split(url: str) -> tuple[str, str, int | None] | None:
     """Scheme, normalized host and explicit port, or None when `url` can't be parsed."""
     try:
         parts = urlsplit(url)
-        return parts.scheme.lower(), _host(parts.hostname), parts.port
+        return parts.scheme.lower(), _host(_netloc_host(parts.netloc)), parts.port
     except ValueError:
         return None
 
@@ -102,7 +115,7 @@ def _normalize(url: str) -> str:
     except ValueError:
         raise ValueError(_INVALID_URL) from None
     scheme = parts.scheme.lower()
-    host = _host(parts.hostname)
+    host = _host(_netloc_host(parts.netloc))
     if (
         port == 0
         or scheme not in {"http", "https"}

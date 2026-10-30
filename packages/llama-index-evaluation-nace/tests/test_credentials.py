@@ -628,3 +628,34 @@ def test_port_zero_base_url_refused(
     with pytest.raises(ValueError, match="absolute http"):
         build(drex, **kwargs)
     assert drex.requests == []
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("zone", ["%25MyVPN", "%MyVPN"])
+async def test_ipv6_zone_id_case_is_preserved(
+    drex: FakeDrex, zone: str, asynchronous: bool
+) -> None:
+    base = f"http://[FE80::1{zone}]:8000/service"
+    client = build(drex, base_url=base, api_key=PROVIDER)
+    assert client.base_url == f"http://[fe80::1{zone}]:8000/service"
+    await send(client, asynchronous=asynchronous)
+    assert "MyVPN" in str(drex.requests[0].url)
+    assert "myvpn" not in str(drex.requests[0].url)
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_ipv6_zone_ids_that_differ_in_case_are_different_origins(
+    drex: FakeDrex, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    client = build(
+        drex,
+        base_url="http://[fe80::1%25MyVPN]:8000",
+        api_key=PROVIDER,
+        http_client=sync_http,
+        http_async_client=async_http,
+    )
+    redirecting(drex, "http://[fe80::1%25myvpn]:8000/v1/systemone")
+    with pytest.raises(NaceRedirectError, match="different origin"):
+        await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 1

@@ -558,16 +558,18 @@ async def test_shared_http_client_user_agent_per_drex_client(drex: FakeDrex) -> 
     ("url", "expected"),
     [
         ("https://openrouter.ai/api/v1", True),
-        ("https://eu.openrouter.ai/api/v1", True),
+        ("https://eu.openrouter.ai/api/v1", False),
+        ("https://openrouter.ai./api/v1", True),
+        ("https://OPENROUTER.AI/api/v1", True),
         ("https://notopenrouter.ai/api/v1", False),
         ("https://openrouter.ai.evil.test/api/v1", False),
         (None, False),
     ],
 )
 def test_is_openrouter_host(url: str | None, expected: bool) -> None:
-    from llama_index.selectors.nace._drex.client import _is_openrouter
+    from llama_index.selectors.nace._drex.origins import is_openrouter_host
 
-    assert _is_openrouter(url) is expected
+    assert is_openrouter_host(url) is expected
 
 
 def test_openrouter_env_default_already_prefixed(

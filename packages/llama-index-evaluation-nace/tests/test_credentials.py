@@ -11,6 +11,7 @@ import pytest
 from fakes import FakeDrex
 from llama_index.evaluation.nace._drex.client import DrexClient
 from llama_index.evaluation.nace._drex.errors import NaceRedirectError
+from llama_index.evaluation.nace._drex.origins import aguard_request, guard_request
 from llama_index.evaluation.nace._version import __version__
 
 CLIENT_NAME = f"llama-index-evaluation-nace/{__version__}"
@@ -833,3 +834,53 @@ async def test_ipv6_literal_base_url_is_built_in_compressed_form(
     assert client.base_url == "http://[2001:db8::a%25MyVPN]:8000/s"
     await send(client, asynchronous=asynchronous)
     assert "MyVPN" in str(drex.requests[0].url)
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_non_ascii_header_bytes_survive_cookie_filtering(
+    ambient: None, drex: FakeDrex, asynchronous: bool
+) -> None:
+    headers = [
+        (b"X-Label", b"caf\xe9"),
+        (b"Cookie", b"theme=dark; _vercel_jwt=jwt-test"),
+        (b"x-LAST", b"1"),
+    ]
+    http = _jar_client(drex, asynchronous=asynchronous, headers=headers)
+    options: dict[str, Any] = {"base_url": "https://provider.example", "api_key": PROVIDER}
+    options["http_async_client" if asynchronous else "http_client"] = http
+    await send(build(drex, **options), asynchronous=asynchronous)
+    raw = drex.requests[0].headers.raw
+    assert (b"X-Label", b"caf\xe9") in raw
+    assert (b"x-LAST", b"1") in raw
+    assert all(b"_vercel_jwt" not in value for _, value in raw)
+    assert [v for n, v in raw if n.lower() == b"cookie"] == [b"theme=dark"]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_cookie_filtering_keeps_other_headers_in_order_and_case(asynchronous: bool) -> None:
+    marker = (b"X-Nace-Integration", b"llama-index-nace")
+    request = httpx.Request(
+        "POST",
+        "https://provider.example/v1/systemone",
+        headers=[
+            marker,
+            (b"X-First", b"caf\xe9"),
+            (b"cookie", b"_vercel_jwt=jwt-test"),
+            (b"X-MiXeD", b"2"),
+            (b"Cookie", b"a=1; _vercel_jwt=jwt-two; b=2"),
+            (b"X-Last", b"3"),
+        ],
+    )
+    if asynchronous:
+        await aguard_request(request)
+    else:
+        guard_request(request)
+    assert request.headers.raw == [
+        (b"Host", b"provider.example"),
+        (b"Content-Length", b"0"),
+        marker,
+        (b"X-First", b"caf\xe9"),
+        (b"X-MiXeD", b"2"),
+        (b"Cookie", b"a=1; b=2"),
+        (b"X-Last", b"3"),
+    ]

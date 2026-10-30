@@ -198,23 +198,29 @@ def resolve_api_key(
 def _strip_bypass_cookies(request: httpx.Request) -> None:
     """Drop the bypass cookies from this request's `Cookie` fields, nothing else.
 
-    Each `Cookie` field is filtered on its own (`headers.get` would join repeated fields with a
-    comma), other cookies keep their field, and a field left empty is removed. Only the outgoing
-    header changes; the caller's cookie jar is never touched.
+    Works on the raw `(name, value)` byte pairs, so every other header keeps its bytes, name case
+    and position (a caller header may hold non-ASCII bytes). Each `Cookie` field is filtered on
+    its own, other cookies keep their field, and a field left empty is removed. A field with no
+    bypass cookie is left byte-for-byte. Only the outgoing header changes; the caller's cookie
+    jar is never touched.
     """
-    fields = request.headers.get_list("cookie")
-    if not fields:
-        return
-    rebuilt: list[str] = []
-    for field in fields:
-        pairs = [pair.strip() for pair in field.split(";") if pair.strip()]
-        kept = [pair for pair in pairs if pair.partition("=")[0].strip() not in BYPASS_COOKIES]
-        if kept:
-            rebuilt.append("; ".join(kept))
-    if rebuilt == fields:
-        return
-    others = [(name, value) for name, value in request.headers.multi_items() if name != "cookie"]
-    request.headers = httpx.Headers([*others, *(("cookie", field) for field in rebuilt)])
+    raw = request.headers.raw
+    rebuilt: list[tuple[bytes, bytes]] = []
+    for name, value in raw:
+        if name.lower() == b"cookie":
+            pairs = [pair.strip() for pair in value.split(b";") if pair.strip()]
+            kept = [
+                pair
+                for pair in pairs
+                if pair.partition(b"=")[0].strip().decode("latin-1") not in BYPASS_COOKIES
+            ]
+            if len(kept) != len(pairs):
+                if not kept:
+                    continue
+                value = b"; ".join(kept)
+        rebuilt.append((name, value))
+    if rebuilt != raw:
+        request.headers = httpx.Headers(rebuilt)
 
 
 def guard_request(request: httpx.Request) -> None:

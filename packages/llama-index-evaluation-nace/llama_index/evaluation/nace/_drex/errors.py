@@ -161,6 +161,16 @@ def _safe_detail(error: nace_sdk.NaceAPIError) -> str | None:
     return None
 
 
+MAX_MESSAGE_CHARS = 500
+
+
+def _clip(text: str, budget: int) -> str:
+    """Cut `text` to at most `budget` characters, ending in an ellipsis when it was cut."""
+    if len(text) <= budget:
+        return text
+    return text[: max(0, budget - 1)] + "…"
+
+
 def _message(error: nace_sdk.NaceAPIError) -> str:
     detail = _safe_detail(error)
     text = f"Drex returned {error.status}" + (f": {detail}" if detail else "")
@@ -170,11 +180,14 @@ def _message(error: nace_sdk.NaceAPIError) -> str:
     # Drex's top-level message often repeats a single issue; don't print it twice.
     if lines and lines != [detail] and [i.get("message") for i in error.issues] != [detail]:
         text += "\n" + "\n".join(f"  {line}" for line in lines)
+    # Recovery guidance is kept whole when it fits; only the descriptive text is cut.
+    guidance = ""
     if error.status == 402:
-        text += f"\nAdd funds at {BILLING_URL}"
+        guidance += f"\nAdd funds at {BILLING_URL}"
     if error.request_id:
-        text += f"\n(request_id={error.request_id})"
-    return text
+        guidance += f"\n(request_id={error.request_id})"
+    guidance = _clip(guidance, 300)
+    return _clip(text, MAX_MESSAGE_CHARS - len(guidance)) + guidance
 
 
 def convert_error(error: Exception) -> Exception:

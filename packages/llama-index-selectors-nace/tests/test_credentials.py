@@ -627,3 +627,42 @@ async def test_ipv6_zone_ids_that_differ_in_case_are_different_origins(
     with pytest.raises(NaceRedirectError, match="different origin"):
         await send(client, asynchronous=asynchronous)
     assert len(drex.requests) == 1
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    ("fields", "expected"),
+    [
+        (["session=ok", "_vercel_jwt=jwt-test"], ["session=ok"]),
+        (["_vercel_jwt=jwt-test", "session=ok"], ["session=ok"]),
+        (["a=1; _vercel_jwt=jwt-test", "b=2; c=3"], ["a=1", "b=2; c=3"]),
+        (["_vercel_jwt=jwt-test", "_vercel_jwt=jwt-two", "session=ok"], ["session=ok"]),
+        (["a=1; b=2", "_vercel_jwt=jwt-test"], ["a=1; b=2"]),
+    ],
+)
+async def test_repeated_cookie_fields_are_filtered_one_by_one(
+    ambient: None, drex: FakeDrex, asynchronous: bool, fields: list[str], expected: list[str]
+) -> None:
+    headers = httpx.Headers([("Cookie", field) for field in fields])
+    http = _jar_client(drex, asynchronous=asynchronous, headers=headers)
+    options: dict[str, Any] = {"base_url": "https://provider.example", "api_key": PROVIDER}
+    options["http_async_client" if asynchronous else "http_client"] = http
+    await send(build(drex, **options), asynchronous=asynchronous)
+    sent = drex.requests[0].headers.get_list("cookie")
+    assert "_vercel_jwt" not in " ".join(sent)
+    assert sent == expected
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_repeated_cookie_fields_kept_for_nace_production(
+    ambient: None, drex: FakeDrex, asynchronous: bool
+) -> None:
+    headers = httpx.Headers([("Cookie", "_vercel_jwt=jwt-test"), ("Cookie", "session=ok")])
+    http = _jar_client(drex, asynchronous=asynchronous, headers=headers)
+    options: dict[str, Any] = {"base_url": "https://console.nace.ai", "api_key": PROVIDER}
+    options["http_async_client" if asynchronous else "http_client"] = http
+    await send(build(drex, **options), asynchronous=asynchronous)
+    assert drex.requests[0].headers.get_list("cookie") == [
+        "_vercel_jwt=jwt-test",
+        "session=ok",
+    ]

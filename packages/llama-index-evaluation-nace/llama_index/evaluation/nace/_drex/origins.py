@@ -188,21 +188,25 @@ def resolve_api_key(
 
 
 def _strip_bypass_cookies(request: httpx.Request) -> None:
-    """Drop the bypass cookies from this request's `Cookie` header, nothing else.
+    """Drop the bypass cookies from this request's `Cookie` fields, nothing else.
 
-    Only the outgoing header changes; the caller's cookie jar is never touched.
+    Each `Cookie` field is filtered on its own (`headers.get` would join repeated fields with a
+    comma), other cookies keep their field, and a field left empty is removed. Only the outgoing
+    header changes; the caller's cookie jar is never touched.
     """
-    header = request.headers.get("cookie")
-    if header is None:
+    fields = request.headers.get_list("cookie")
+    if not fields:
         return
-    pairs = [pair.strip() for pair in header.split(";") if pair.strip()]
-    kept = [pair for pair in pairs if pair.partition("=")[0].strip() not in BYPASS_COOKIES]
-    if len(kept) == len(pairs):
+    rebuilt: list[str] = []
+    for field in fields:
+        pairs = [pair.strip() for pair in field.split(";") if pair.strip()]
+        kept = [pair for pair in pairs if pair.partition("=")[0].strip() not in BYPASS_COOKIES]
+        if kept:
+            rebuilt.append("; ".join(kept))
+    if rebuilt == fields:
         return
-    if kept:
-        request.headers["cookie"] = "; ".join(kept)
-    else:
-        del request.headers["cookie"]
+    others = [(name, value) for name, value in request.headers.multi_items() if name != "cookie"]
+    request.headers = httpx.Headers([*others, *(("cookie", field) for field in rebuilt)])
 
 
 def guard_request(request: httpx.Request) -> None:

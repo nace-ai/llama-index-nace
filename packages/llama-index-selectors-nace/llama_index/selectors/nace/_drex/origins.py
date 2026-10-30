@@ -21,6 +21,9 @@ NACE_PRODUCTION_HOSTS = frozenset({"console.nace.ai", "drex.nace.ai"})
 OPENROUTER_HOST = "openrouter.ai"
 ORIGIN_EXTENSION = "llama_index_nace.origin"
 BYPASS_HEADERS = ("x-vercel-protection-bypass", "x-vercel-set-bypass-cookie")
+# `X-Nace-Client` values of requests this integration owns; the SDK-wide `X-Nace-SDK` header is
+# on every SDK request, including other users' clients that share an httpx client.
+OWNED_CLIENT_PREFIXES = ("llama-index-selectors-nace/", "llama-index-evaluation-nace/")
 _DEFAULT_PORTS = {"http": 80, "https": 443}
 
 _REFUSED_CUSTOM = (
@@ -172,8 +175,9 @@ def resolve_api_key(
 def guard_request(request: httpx.Request) -> None:
     """Request hook for every httpx client a `DrexClient` uses; sync and async share it.
 
-    Acts only on Drex requests (the SDK sets `X-Nace-Client` / `X-Nace-SDK`), so other traffic
-    on a shared client is left alone, and is idempotent, because several `DrexClient`s (and
+    Acts only on requests this integration sends (`X-Nace-Client` starts with one of
+    `OWNED_CLIENT_PREFIXES`), so other traffic on a shared client, including a standalone
+    `nace_sdk` client, is left alone, and is idempotent, because several `DrexClient`s (and
     both packages' copies of this hook) may sit on one client.
 
     - Binds the request to the origin of its first hop: a later hop (a redirect) to another
@@ -187,7 +191,8 @@ def guard_request(request: httpx.Request) -> None:
         nace_sdk.NaceError: The request left its first origin.
 
     """
-    if "x-nace-client" not in request.headers and "x-nace-sdk" not in request.headers:
+    name = request.headers.get("x-nace-client", "")
+    if not name.startswith(OWNED_CLIENT_PREFIXES):
         return
     url = request.url
     scheme = url.scheme.lower()
@@ -196,11 +201,9 @@ def guard_request(request: httpx.Request) -> None:
     if origin != first or url.userinfo:
         raise nace_sdk.NaceError(REDIRECT_MESSAGE)
     if not is_nace_production(url):
-        for name in BYPASS_HEADERS:
-            request.headers.pop(name, None)
-    name = request.headers.get("x-nace-client")
-    if name:
-        request.headers["User-Agent"] = name
+        for header in BYPASS_HEADERS:
+            request.headers.pop(header, None)
+    request.headers["User-Agent"] = name
 
 
 async def aguard_request(request: httpx.Request) -> None:

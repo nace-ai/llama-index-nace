@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib.metadata import version
 from typing import Any
 
 import httpx
@@ -507,3 +508,33 @@ async def test_env_on_prem_without_openrouter_flag_keeps_nace_key(
     monkeypatch.setenv("OPENROUTER_API_KEY", OPENROUTER_KEY)
     await send(build(drex), asynchronous=asynchronous)
     assert bearer(drex) == f"Bearer {ONPREM}"
+
+
+@pytest.mark.skipif(
+    tuple(int(part) for part in version("nace-sdk").split(".")[:3]) >= (0, 6, 2),
+    reason="nace-sdk 0.6.2+ refuses cross-origin redirects itself, for every client",
+)
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("client_info", [None, "other-app/1.0", "llama-index-selectors-nacex/1"])
+async def test_standalone_sdk_client_on_a_shared_client_is_untouched(
+    ambient: None, drex: FakeDrex, asynchronous: bool, client_info: str | None
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    ours = build(drex, http_client=sync_http, http_async_client=async_http)
+    options: dict[str, Any] = {
+        "api_key": PROVIDER,
+        "base_url": "https://console.nace.ai",
+        "client_info": client_info,
+    }
+    redirecting(drex, "https://storage.example/v1/systemone")
+    if asynchronous:
+        other = nace_sdk.AsyncNaceClient(**options, http_client=async_http)
+        await other.system_one(*CALL)
+    else:
+        standalone = nace_sdk.NaceClient(**options, http_client=sync_http)
+        standalone.system_one(*CALL)
+    assert [r.url.host for r in drex.requests] == ["console.nace.ai", "storage.example"]
+    # The integration's own requests on the same client are still bound to their origin.
+    redirecting(drex, "https://storage.example/v1/systemone")
+    with pytest.raises(NaceRedirectError):
+        await send(ours, asynchronous=asynchronous)

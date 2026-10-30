@@ -32,6 +32,8 @@ class NaceCorrectnessEvaluator(NaceEvaluator):
     Args:
         score_threshold: Minimum score to pass (default 4.0).
         **kwargs: `model`, `api_key`, `base_url`, `timeout`, `max_images`, `client`, ...
+            A custom `base_url` needs the provider's `api_key`; OpenRouter uses
+            `OPENROUTER_API_KEY`.
 
     """
 

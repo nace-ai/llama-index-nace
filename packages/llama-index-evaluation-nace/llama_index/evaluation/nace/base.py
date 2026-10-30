@@ -80,7 +80,8 @@ class NaceEvaluator(BaseEvaluator):
             Without it, more than 8 image sources (Drex's limit) raise
             `NaceImageLimitError`.
         client: A prepared `DrexClient`. Otherwise one is built from `client_kwargs`
-            (`model`, `api_key`, `base_url`, `timeout`, ...).
+            (`model`, `api_key`, `base_url`, `timeout`, ...). A custom `base_url` needs the
+            provider's `api_key`; OpenRouter uses `OPENROUTER_API_KEY`.
 
     """
 

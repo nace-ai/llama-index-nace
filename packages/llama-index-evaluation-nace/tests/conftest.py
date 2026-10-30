@@ -38,6 +38,10 @@ def _no_env(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> 
         "DREX_API_KEY",
         "DREX_BASE_URL",
         "DREX_DEFAULT_MODEL",
+        "NACE_VERCEL_PROTECTION_BYPASS",
+        "OPENROUTER_API_KEY",
+        "NACE_CONFIG_PATH",
+        "DREX_CONFIG_PATH",
     ):
         monkeypatch.delenv(name, raising=False)
 

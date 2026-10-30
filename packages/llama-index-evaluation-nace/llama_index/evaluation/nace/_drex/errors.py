@@ -11,6 +11,13 @@ import httpx
 import nace_sdk
 
 BILLING_URL = "https://console.nace.ai/dashboard/billing"
+# The text of the SDK error raised when an API redirect changes origin (nace-sdk 0.6.2 raises it
+# itself; `origins.guard_request` raises it on older SDKs).
+REDIRECT_MESSAGE = "Refusing an API redirect to a different origin"
+_REDIRECT_DETAIL = (
+    f"{REDIRECT_MESSAGE} (scheme, host or port changed). Credentials and the request stay with "
+    "the configured base_url; set base_url to the final API URL."
+)
 
 
 class NaceError(Exception):
@@ -113,6 +120,13 @@ class NaceAPIResponseValidationError(NaceError):
     """Drex answered 200 with a body this package can't read."""
 
 
+class NaceRedirectError(NaceError):
+    """A redirect pointed to a different origin; it was refused before sending.
+
+    Credentials and the request stayed with the configured base_url.
+    """
+
+
 _BY_STATUS: dict[int, type[NaceAPIError]] = {
     400: NaceBadRequestError,
     401: NaceAuthenticationError,
@@ -176,6 +190,8 @@ def convert_error(error: Exception) -> Exception:
         if cls is None:
             cls = NaceInternalServerError if error.status >= 500 else NaceAPIError
         return cls(error, _message(error))
+    if isinstance(error, nace_sdk.NaceError) and str(error).startswith(REDIRECT_MESSAGE):
+        return NaceRedirectError(_REDIRECT_DETAIL)
     if isinstance(error, nace_sdk.NaceError):
         return NaceError(str(error))
     return error
@@ -183,6 +199,7 @@ def convert_error(error: Exception) -> Exception:
 
 __all__ = [
     "BILLING_URL",
+    "REDIRECT_MESSAGE",
     "NaceAPIConnectionError",
     "NaceAPIError",
     "NaceAPIResponseValidationError",
@@ -200,6 +217,7 @@ __all__ = [
     "NaceOverloadedError",
     "NacePermissionDeniedError",
     "NaceRateLimitError",
+    "NaceRedirectError",
     "NaceUnprocessableEntityError",
     "convert_error",
 ]

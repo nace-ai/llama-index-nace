@@ -6,7 +6,6 @@ import json
 import os
 from collections.abc import Mapping, Sequence
 from typing import Any
-from urllib.parse import urlsplit
 
 import httpx
 import nace_sdk
@@ -20,6 +19,15 @@ from .errors import (
     convert_error,
 )
 from .images import as_data_url, to_drex_image
+from .origins import (
+    INTEGRATION_HEADER,
+    INTEGRATION_MARKER,
+    aguard_request,
+    guard_request,
+    is_openrouter_host,
+    resolve_api_key,
+    resolve_destination,
+)
 
 # Updated by hand when Drex ships a new default model; see "Releasing" in the repository README.
 DEFAULT_MODEL = "drex-max-v1.1"
@@ -40,28 +48,6 @@ Question = nace_sdk.Noul | nace_sdk.Choice | nace_sdk.Score
 def _normalize(model: str) -> str:
     """The bare model id: no vendor prefix, no leading `~`."""
     return model.rsplit("/", 1)[-1].lstrip("~")
-
-
-def _is_openrouter(base_url: str | None) -> bool:
-    if not base_url:
-        return False
-    host = urlsplit(str(base_url)).hostname or ""
-    return host == "openrouter.ai" or host.endswith(".openrouter.ai")
-
-
-def _set_user_agent(request: httpx.Request) -> None:
-    """Send the client name as `User-Agent` too; the SDK sets it as `X-Nace-Client`.
-
-    Read from the request, not from a `DrexClient`, so one httpx client shared by several
-    `DrexClient`s sends each one's own name and the hook is installed once.
-    """
-    name = request.headers.get("X-Nace-Client")
-    if name:
-        request.headers["User-Agent"] = name
-
-
-async def _aset_user_agent(request: httpx.Request) -> None:
-    _set_user_agent(request)
 
 
 class DrexClient:
@@ -85,11 +71,15 @@ class DrexClient:
         """Build the sync and async SDK clients.
 
         `http_client` and `http_async_client` stay the caller's: `close()` and `aclose()`
-        close only the httpx clients this object created.
+        close only the httpx clients this object created. A supplied client gets one request
+        hook added that binds Drex requests to their first origin and removes internal
+        deployment headers off non-production hosts; it ignores the caller's other requests.
 
         Raises:
             ValueError: `timeout` is under 60 s, `model` is blank, `openrouter=True` without
-                a `base_url`, or the SDK refuses the configuration (for example no API key).
+                a `base_url`, the destination is not a valid http(s) URL, no key may be used
+                for it (a custom `base_url=` needs `api_key=`; OpenRouter needs its own key),
+                or the SDK refuses the configuration.
 
         """
         if timeout < MIN_TIMEOUT:
@@ -102,28 +92,37 @@ class DrexClient:
         self.model = model.strip() if model else None
         self.timeout = timeout
         self.model_kwargs: dict[str, Any] = dict(model_kwargs or {})
-        # An empty NACE_BASE_URL (common in CI and .env files) means "use the default".
-        base_url = (base_url if base_url is not None else os.environ.get("NACE_BASE_URL")) or ""
-        self.base_url: str | None = base_url.strip() or None
-        self.openrouter = openrouter if openrouter is not None else _is_openrouter(self.base_url)
-        if self.openrouter and not self.base_url:
+        destination = resolve_destination(base_url)
+        self.base_url: str = destination.url
+        self.openrouter = (
+            openrouter if openrouter is not None else is_openrouter_host(self.base_url)
+        )
+        if self.openrouter and destination.source == "default":
             message = "openrouter=True needs a base_url, such as https://openrouter.ai/api/v1."
             raise ValueError(message)
+        resolved_key = resolve_api_key(api_key, destination, openrouter=self.openrouter)
 
-        headers = dict(default_headers or {})
+        # `httpx.Headers` keeps repeated fields (a `dict` would comma-join repeated `Cookie` ones).
+        headers = httpx.Headers(default_headers)
         if self.openrouter:
             headers.setdefault("HTTP-Referer", "https://nace.ai")
             headers.setdefault("X-OpenRouter-Title", "Drex for LlamaIndex")
+        # The hook below recognizes this integration's requests by this marker, not by the
+        # caller-chosen client name; a caller header of that name never replaces it.
+        headers.pop(INTEGRATION_HEADER, None)
+        headers[INTEGRATION_HEADER] = INTEGRATION_MARKER
         self._owns_http = http_client is None
         self._owns_async_http = http_async_client is None
-        sync_http = http_client or httpx.Client(timeout=timeout)
-        if _set_user_agent not in sync_http.event_hooks["request"]:
-            sync_http.event_hooks["request"].append(_set_user_agent)
-        async_http = http_async_client or httpx.AsyncClient(timeout=timeout)
-        if _aset_user_agent not in async_http.event_hooks["request"]:
-            async_http.event_hooks["request"].append(_aset_user_agent)
+        # Owned clients never follow redirects; a supplied one may, and the hook below then
+        # refuses any hop that leaves the first origin.
+        sync_http = http_client or httpx.Client(timeout=timeout, follow_redirects=False)
+        if guard_request not in sync_http.event_hooks["request"]:
+            sync_http.event_hooks["request"].append(guard_request)
+        async_http = http_async_client or httpx.AsyncClient(timeout=timeout, follow_redirects=False)
+        if aguard_request not in async_http.event_hooks["request"]:
+            async_http.event_hooks["request"].append(aguard_request)
         options: dict[str, Any] = {
-            "api_key": api_key,
+            "api_key": resolved_key,
             "base_url": self._sdk_base_url(),
             # timeout=None: the default 30 s total budget would stop retries after a slow
             # attempt, which is the normal case for Drex (60 s floor); max_retries bounds it.
@@ -149,8 +148,8 @@ class DrexClient:
         if self._owns_async_http:
             await self._aclient.aclose()
 
-    def _sdk_base_url(self) -> str | None:
-        if self.base_url and self.openrouter:
+    def _sdk_base_url(self) -> str:
+        if self.openrouter:
             # OpenRouter documents `.../api/v1`; the SDK appends `/v1/systemone` itself.
             return self.base_url.rstrip("/").removesuffix("/v1")
         return self.base_url

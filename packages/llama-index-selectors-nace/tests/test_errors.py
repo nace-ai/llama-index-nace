@@ -18,6 +18,7 @@ from llama_index.selectors.nace._drex.errors import (
     NaceOverloadedError,
     NacePermissionDeniedError,
     NaceRateLimitError,
+    NaceRedirectError,
     NaceUnprocessableEntityError,
     convert_error,
 )
@@ -134,3 +135,12 @@ def test_client_side_errors():
     assert issubclass(NaceImageModelError, NaceImageError)
     low = NaceLowConfidenceError("unsure", probabilities={"a": 0.4})
     assert low.probabilities == {"a": 0.4}
+
+
+def test_sdk_redirect_refusal_maps_to_redirect_error():
+    refusal = convert_error(nace_sdk.NaceError("Refusing an API redirect to a different origin"))
+    assert isinstance(refusal, NaceRedirectError)
+    assert "different origin" in str(refusal)
+    other = convert_error(nace_sdk.NaceError("other"))
+    assert type(other) is NaceError
+    assert not isinstance(other, NaceRedirectError)

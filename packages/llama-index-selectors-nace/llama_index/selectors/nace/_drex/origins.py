@@ -12,10 +12,16 @@ from typing import Literal, NamedTuple
 from urllib.parse import urlsplit, urlunsplit
 
 import httpx
+import nace_sdk
+
+from .errors import REDIRECT_MESSAGE
 
 DEFAULT_BASE_URL = "https://console.nace.ai"
 NACE_PRODUCTION_HOSTS = frozenset({"console.nace.ai", "drex.nace.ai"})
 OPENROUTER_HOST = "openrouter.ai"
+ORIGIN_EXTENSION = "llama_index_nace.origin"
+BYPASS_HEADERS = ("x-vercel-protection-bypass", "x-vercel-set-bypass-cookie")
+_DEFAULT_PORTS = {"http": 80, "https": 443}
 
 _REFUSED_CUSTOM = (
     "base_url points to a provider other than Nace, so pass that provider's key as api_key=. "
@@ -146,3 +152,42 @@ def resolve_api_key(api_key: str | None, destination: Destination) -> str:
     if key := _env("NACE_API_KEY") or _env("DREX_API_KEY"):
         return key
     raise ValueError(_NO_KEY)
+
+
+def guard_request(request: httpx.Request) -> None:
+    """Request hook for every httpx client a `DrexClient` uses; sync and async share it.
+
+    Acts only on Drex requests (the SDK sets `X-Nace-Client` / `X-Nace-SDK`), so other traffic
+    on a shared client is left alone, and is idempotent, because several `DrexClient`s (and
+    both packages' copies of this hook) may sit on one client.
+
+    - Binds the request to the origin of its first hop: a later hop (a redirect) to another
+      scheme, host or port, or to a URL with userinfo, is refused before it is sent, with the
+      error the SDK itself raises, so credentials and the request body never leave.
+    - Removes the internal deployment headers from every request that isn't going to Nace
+      production, whatever put them there.
+    - Sends the client name as `User-Agent` too; the SDK sets it as `X-Nace-Client`.
+
+    Raises:
+        nace_sdk.NaceError: The request left its first origin.
+
+    """
+    if "x-nace-client" not in request.headers and "x-nace-sdk" not in request.headers:
+        return
+    url = request.url
+    scheme = url.scheme.lower()
+    origin = (scheme, _host(url.host), url.port or _DEFAULT_PORTS.get(scheme))
+    first = request.extensions.setdefault(ORIGIN_EXTENSION, origin)
+    if origin != first or url.userinfo:
+        raise nace_sdk.NaceError(REDIRECT_MESSAGE)
+    if not is_nace_production(url):
+        for name in BYPASS_HEADERS:
+            request.headers.pop(name, None)
+    name = request.headers.get("x-nace-client")
+    if name:
+        request.headers["User-Agent"] = name
+
+
+async def aguard_request(request: httpx.Request) -> None:
+    """Async client twin of `guard_request`."""
+    guard_request(request)

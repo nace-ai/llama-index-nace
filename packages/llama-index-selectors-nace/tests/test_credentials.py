@@ -9,6 +9,7 @@ import nace_sdk
 import pytest
 from fakes import FakeDrex
 from llama_index.selectors.nace._drex.client import DrexClient
+from llama_index.selectors.nace._drex.errors import NaceRedirectError
 from llama_index.selectors.nace._version import __version__
 
 CLIENT_NAME = f"llama-index-selectors-nace/{__version__}"
@@ -247,3 +248,155 @@ def test_legacy_key_is_used_when_nace_key_is_blank(
     monkeypatch.setenv("DREX_API_KEY", "nace_sk_test_legacy")
     build(drex).ask(*CALL)
     assert bearer(drex) == "Bearer nace_sk_test_legacy"
+
+
+# --- bypass headers and origin binding ---------------------------------------------------------
+
+BYPASS = "x-vercel-protection-bypass"
+BYPASS_COOKIE = "x-vercel-set-bypass-cookie"
+
+
+def redirecting(drex: FakeDrex, target: str, *, times: int = 1) -> None:
+    for _ in range(times):
+        drex.replies.append((307, {"location": target}, {}))
+
+
+def following_clients(
+    drex: FakeDrex, **client_kwargs: Any
+) -> tuple[httpx.Client, httpx.AsyncClient]:
+    return (
+        httpx.Client(transport=drex.transport(), follow_redirects=True, **client_kwargs),
+        httpx.AsyncClient(transport=drex.async_transport(), follow_redirects=True, **client_kwargs),
+    )
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    "base_url",
+    [
+        "https://provider.example",
+        "https://openrouter.ai/api/v1",
+        "https://evil.nace.ai",
+        "https://console.nace.ai.evil.test",
+    ],
+)
+async def test_bypass_only_reaches_nace_production(
+    ambient: None, drex: FakeDrex, base_url: str, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex, headers={BYPASS: "client-default"})
+    client = build(
+        drex,
+        base_url=base_url,
+        api_key=PROVIDER,
+        default_headers={"X-Vercel-Set-Bypass-Cookie": "true", BYPASS: "explicit"},
+        http_client=sync_http,
+        http_async_client=async_http,
+    )
+    await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 1
+    assert BYPASS not in drex.requests[0].headers
+    assert BYPASS_COOKIE not in drex.requests[0].headers
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_bypass_kept_on_nace_production(
+    ambient: None, drex: FakeDrex, asynchronous: bool
+) -> None:
+    await send(build(drex), asynchronous=asynchronous)
+    assert drex.requests[0].headers[BYPASS] == "test-bypass"
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    "target",
+    [
+        "https://attacker.example/v1/systemone",
+        "https://drex.nace.ai/v1/systemone",
+        "http://console.nace.ai/v1/systemone",
+        "https://console.nace.ai:8443/v1/systemone",
+        "https://user:pw@console.nace.ai/v1/systemone",
+    ],
+)
+async def test_cross_origin_redirect_refused_before_send(
+    ambient: None, drex: FakeDrex, target: str, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    client = build(drex, http_client=sync_http, http_async_client=async_http, max_retries=2)
+    redirecting(drex, target)
+    with pytest.raises(NaceRedirectError, match="different origin"):
+        await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 1
+    assert drex.requests[0].url.host == "console.nace.ai"
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_same_origin_redirect_keeps_credentials(
+    ambient: None, drex: FakeDrex, asynchronous: bool
+) -> None:
+    seen: list[str] = []
+
+    def record(request: httpx.Request) -> None:
+        seen.append(str(request.url))
+
+    async def arecord(request: httpx.Request) -> None:
+        record(request)
+
+    sync_http, async_http = following_clients(drex)
+    sync_http.event_hooks["request"].append(record)
+    async_http.event_hooks["request"].append(arecord)
+    client = build(drex, http_client=sync_http, http_async_client=async_http)
+    redirecting(drex, "/moved/v1/systemone")
+    await send(client, asynchronous=asynchronous)
+    assert [r.url.path for r in drex.requests] == ["/v1/systemone", "/moved/v1/systemone"]
+    assert len(seen) == 2
+    for request in drex.requests:
+        assert request.headers["authorization"] == f"Bearer {AMBIENT}"
+        assert request.headers[BYPASS] == "test-bypass"
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_on_prem_scheme_upgrade_refused(
+    monkeypatch: pytest.MonkeyPatch, drex: FakeDrex, asynchronous: bool
+) -> None:
+    monkeypatch.setenv("NACE_BASE_URL", "http://onprem.example")
+    monkeypatch.setenv("NACE_API_KEY", ONPREM)
+    sync_http, async_http = following_clients(drex)
+    client = build(drex, http_client=sync_http, http_async_client=async_http)
+    redirecting(drex, "https://onprem.example/v1/systemone")
+    with pytest.raises(NaceRedirectError):
+        await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 1
+
+
+def unrelated_transport(seen: list[httpx.Request]) -> httpx.MockTransport:
+    """Records the caller's own traffic: `/x` redirects to another host, `/y` answers."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        if request.url.path == "/x":
+            return httpx.Response(307, headers={"location": "https://other.example/y"})
+        return httpx.Response(200)
+
+    return httpx.MockTransport(handler)
+
+
+def test_unrelated_requests_on_a_shared_client_are_untouched(ambient: None, drex: FakeDrex) -> None:
+    seen: list[httpx.Request] = []
+    http = httpx.Client(transport=unrelated_transport(seen), follow_redirects=True)
+    build(drex, http_client=http)
+    response = http.get("https://unrelated.example/x", headers={BYPASS: "own"})
+    assert response.status_code == 200
+    assert [r.url.host for r in seen] == ["unrelated.example", "other.example"]
+    assert seen[0].headers[BYPASS] == "own"
+
+
+async def test_unrelated_async_requests_on_a_shared_client_are_untouched(
+    ambient: None, drex: FakeDrex
+) -> None:
+    seen: list[httpx.Request] = []
+    http = httpx.AsyncClient(transport=unrelated_transport(seen), follow_redirects=True)
+    build(drex, http_async_client=http)
+    response = await http.get("https://unrelated.example/x", headers={BYPASS: "own"})
+    assert response.status_code == 200
+    assert [r.url.host for r in seen] == ["unrelated.example", "other.example"]
+    assert seen[0].headers[BYPASS] == "own"

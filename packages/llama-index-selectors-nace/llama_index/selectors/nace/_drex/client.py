@@ -19,7 +19,13 @@ from .errors import (
     convert_error,
 )
 from .images import as_data_url, to_drex_image
-from .origins import is_openrouter_host, resolve_api_key, resolve_destination
+from .origins import (
+    aguard_request,
+    guard_request,
+    is_openrouter_host,
+    resolve_api_key,
+    resolve_destination,
+)
 
 # Updated by hand when Drex ships a new default model; see "Releasing" in the repository README.
 DEFAULT_MODEL = "drex-max-v1.1"
@@ -40,21 +46,6 @@ Question = nace_sdk.Noul | nace_sdk.Choice | nace_sdk.Score
 def _normalize(model: str) -> str:
     """The bare model id: no vendor prefix, no leading `~`."""
     return model.rsplit("/", 1)[-1].lstrip("~")
-
-
-def _set_user_agent(request: httpx.Request) -> None:
-    """Send the client name as `User-Agent` too; the SDK sets it as `X-Nace-Client`.
-
-    Read from the request, not from a `DrexClient`, so one httpx client shared by several
-    `DrexClient`s sends each one's own name and the hook is installed once.
-    """
-    name = request.headers.get("X-Nace-Client")
-    if name:
-        request.headers["User-Agent"] = name
-
-
-async def _aset_user_agent(request: httpx.Request) -> None:
-    _set_user_agent(request)
 
 
 class DrexClient:
@@ -78,7 +69,9 @@ class DrexClient:
         """Build the sync and async SDK clients.
 
         `http_client` and `http_async_client` stay the caller's: `close()` and `aclose()`
-        close only the httpx clients this object created.
+        close only the httpx clients this object created. A supplied client gets one request
+        hook added that binds Drex requests to their first origin and removes internal
+        deployment headers off non-production hosts; it ignores the caller's other requests.
 
         Raises:
             ValueError: `timeout` is under 60 s, `model` is blank, `openrouter=True` without
@@ -113,12 +106,14 @@ class DrexClient:
             headers.setdefault("X-OpenRouter-Title", "Drex for LlamaIndex")
         self._owns_http = http_client is None
         self._owns_async_http = http_async_client is None
-        sync_http = http_client or httpx.Client(timeout=timeout)
-        if _set_user_agent not in sync_http.event_hooks["request"]:
-            sync_http.event_hooks["request"].append(_set_user_agent)
-        async_http = http_async_client or httpx.AsyncClient(timeout=timeout)
-        if _aset_user_agent not in async_http.event_hooks["request"]:
-            async_http.event_hooks["request"].append(_aset_user_agent)
+        # Owned clients never follow redirects; a supplied one may, and the hook below then
+        # refuses any hop that leaves the first origin.
+        sync_http = http_client or httpx.Client(timeout=timeout, follow_redirects=False)
+        if guard_request not in sync_http.event_hooks["request"]:
+            sync_http.event_hooks["request"].append(guard_request)
+        async_http = http_async_client or httpx.AsyncClient(timeout=timeout, follow_redirects=False)
+        if aguard_request not in async_http.event_hooks["request"]:
+            async_http.event_hooks["request"].append(aguard_request)
         options: dict[str, Any] = {
             "api_key": resolved_key,
             "base_url": self._sdk_base_url(),

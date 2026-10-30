@@ -638,7 +638,7 @@ async def test_ipv6_zone_id_case_is_preserved(
 ) -> None:
     base = f"http://[FE80::1{zone}]:8000/service"
     client = build(drex, base_url=base, api_key=PROVIDER)
-    assert client.base_url == f"http://[fe80::1{zone}]:8000/service"
+    assert client.base_url == base
     await send(client, asynchronous=asynchronous)
     assert "MyVPN" in str(drex.requests[0].url)
     assert "myvpn" not in str(drex.requests[0].url)
@@ -825,13 +825,13 @@ async def test_redirect_to_another_ip_address_is_still_refused(
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])
-async def test_ipv6_literal_base_url_is_built_in_compressed_form(
+async def test_ipv6_literal_base_url_keeps_the_callers_spelling(
     drex: FakeDrex, asynchronous: bool
 ) -> None:
     client = build(
         drex, base_url="http://[2001:0DB8:0:0:0:0:0:000A%25MyVPN]:8000/s", api_key=PROVIDER
     )
-    assert client.base_url == "http://[2001:db8::a%25MyVPN]:8000/s"
+    assert client.base_url == "http://[2001:0DB8:0:0:0:0:0:000A%25MyVPN]:8000/s"
     await send(client, asynchronous=asynchronous)
     assert "MyVPN" in str(drex.requests[0].url)
 
@@ -1028,3 +1028,35 @@ def test_fullwidth_hosts_are_refused(
     with pytest.raises(ValueError, match="absolute"):
         build(drex, **kwargs)
     assert drex.requests == []
+
+
+# --- the host that was sent is the host the caller wrote ---------------------------------------
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize(
+    "literal",
+    [
+        "http://[0:0:0:0:0:0:0:1]:8000",
+        "http://[2001:0DB8::000A]:8000",
+        "http://[::ffff:127.0.0.1]:8000",
+        "http://[FE80:0:0:0:0:0:0:1%25MyVPN]:8000",
+    ],
+)
+async def test_same_literal_redirect_keeps_authorization(
+    drex: FakeDrex, literal: str, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    client = build(
+        drex,
+        base_url=literal,
+        api_key=PROVIDER,
+        http_client=sync_http,
+        http_async_client=async_http,
+    )
+    redirecting(drex, f"{literal}/moved/v1/systemone")
+    await send(client, asynchronous=asynchronous)
+    assert len(drex.requests) == 2
+    for request in drex.requests:
+        assert request.headers["authorization"] == f"Bearer {PROVIDER}"
+    assert client.base_url == literal

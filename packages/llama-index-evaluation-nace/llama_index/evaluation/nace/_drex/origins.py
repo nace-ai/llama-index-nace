@@ -121,7 +121,7 @@ def is_openrouter_production(url: str | None) -> bool:
 
 
 def _normalize(url: str) -> str:
-    """Validate `url` and return it with a lower-case host and no trailing slash.
+    """Validate `url`; return it with a lower-case DNS host (IP literal as written), no trailing /.
 
     Messages never echo `url`, which may carry a password or token.
     """
@@ -148,9 +148,11 @@ def _normalize(url: str) -> str:
         raise ValueError(_INVALID_URL)
     if host in NACE_PRODUCTION_HOSTS and (scheme != "https" or port not in {None, 443}):
         raise ValueError(_INSECURE_NACE)
-    if ":" in host:
-        host = f"[{host}]"
-    netloc = host if port is None else f"{host}:{port}"
+    # An IP literal goes out exactly as written: httpx compares hosts as text, so rewriting
+    # `[0:0:0:0:0:0:0:1]` to `[::1]` would make a redirect to the same literal look foreign and
+    # drop the Authorization header. Only origin comparison canonicalizes.
+    shown = f"[{sent}]" if ":" in host else host
+    netloc = shown if port is None else f"{shown}:{port}"
     return urlunsplit((scheme, netloc, parts.path.rstrip("/"), "", ""))
 
 

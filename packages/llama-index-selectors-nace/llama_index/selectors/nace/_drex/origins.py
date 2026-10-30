@@ -29,6 +29,7 @@ BYPASS_HEADERS = ("x-vercel-protection-bypass", "x-vercel-set-bypass-cookie")
 INTEGRATION_HEADER = "X-Nace-Integration"
 INTEGRATION_MARKER = "llama-index-nace"
 BYPASS_COOKIES = frozenset({"_vercel_jwt"})
+_BYPASS_MARK = b"_vercel_jwt"
 _DEFAULT_PORTS = {"http": 80, "https": 443}
 
 _REFUSED_CUSTOM = (
@@ -260,14 +261,18 @@ def _strip_bypass_cookies(request: httpx.Request) -> None:
     its own; its pairs end at `;` or `,` outside double quotes (a joined repeated field uses a
     comma). Only the `_vercel_jwt=<value>` pairs are cut out: every other byte of the field,
     including quoted values with commas or semicolons, is left as it was, and a field left empty
-    is removed. Only the outgoing header changes; the caller's cookie jar is never touched.
+    is removed, and so is any field that still contains the cookie's name after that.
+    Only the outgoing header changes; the caller's cookie jar is never touched.
     """
     raw = request.headers.raw
     rebuilt: list[tuple[bytes, bytes]] = []
     for name, value in raw:
         if name.lower() == b"cookie":
             filtered = _without_bypass_cookies(value)
-            if filtered is None:
+            # Fail closed: the splitter can be fooled by a malformed field (an unterminated
+            # quote swallows the pairs after it), so a field that still names the bypass cookie
+            # anywhere after the excision is not sent at all.
+            if filtered is None or _BYPASS_MARK in filtered.lower():
                 continue
             value = filtered
         rebuilt.append((name, value))

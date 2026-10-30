@@ -1073,7 +1073,7 @@ async def test_same_literal_redirect_keeps_authorization(
         (b'_vercel_jwt=token; prefs="a,b"', [b'prefs="a,b"']),
         (b'prefs="a;b",x=1, _vercel_jwt=token', [b'prefs="a;b",x=1']),
         (b'_vercel_jwt="t;o,k"; prefs="a, b"', [b'prefs="a, b"']),
-        (b'a="x\\"; _vercel_jwt=no"; _vercel_jwt=t', [b'a="x\\"; _vercel_jwt=no"']),
+        (b'a="x\\"; _vercel_jwt=no"; _vercel_jwt=t', []),
         (b'prefs="a,b";   other=1', [b'prefs="a,b";   other=1']),
         (b'  prefs="a,b" ;c=d  ', [b'  prefs="a,b" ;c=d  ']),
         (b'_vercel_jwt="t,k"', []),
@@ -1092,3 +1092,89 @@ async def test_other_cookies_keep_their_bytes(
     else:
         guard_request(request)
     assert [v for n, v in request.headers.raw if n.lower() == b"cookie"] == expected
+
+
+# --- a bypass cookie hidden by a malformed field is never sent ---------------------------------
+
+_HIDDEN_COOKIES = [
+    'prefs="; _vercel_jwt=jwt-secret-test',
+    'prefs="; _VERCEL_JWT=jwt-secret-test; a=1',
+    '_vercel_jwt=jwt-test; prefs="x; _vercel_jwt=jwt-secret-test',
+    'a=1, p="x; b=2; _Vercel_Jwt=jwt-secret-test',
+]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("via", ["client_header", "default_headers"])
+@pytest.mark.parametrize("cookie", _HIDDEN_COOKIES)
+async def test_malformed_cookie_field_hiding_the_bypass_cookie_is_dropped(
+    ambient: None, drex: FakeDrex, asynchronous: bool, via: str, cookie: str
+) -> None:
+    options: dict[str, Any] = {"base_url": "https://provider.example", "api_key": PROVIDER}
+    client_kwargs: dict[str, Any] = {}
+    if via == "client_header":
+        client_kwargs["headers"] = {"Cookie": cookie}
+    else:
+        options["default_headers"] = {"Cookie": cookie}
+    cls = httpx.AsyncClient if asynchronous else httpx.Client
+    transport = drex.async_transport() if asynchronous else drex.transport()
+    options["http_async_client" if asynchronous else "http_client"] = cls(
+        transport=transport, **client_kwargs
+    )
+    await send(build(drex, **options), asynchronous=asynchronous)
+    sent = drex.requests[0].headers
+    assert "jwt" not in " ".join(sent.get_list("cookie")).lower()
+    assert "jwt-secret-test" not in str(sent)
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("before", [True, False])
+async def test_malformed_cookie_from_the_jar_hiding_the_bypass_cookie_is_dropped(
+    ambient: None, drex: FakeDrex, asynchronous: bool, before: bool
+) -> None:
+    cls = httpx.AsyncClient if asynchronous else httpx.Client
+    transport = drex.async_transport() if asynchronous else drex.transport()
+    http = cls(transport=transport)
+    if before:
+        http.cookies.set("prefs", '"')
+        http.cookies.set("_vercel_jwt", "jwt-secret-test")
+    else:
+        http.cookies.set("_vercel_jwt", "jwt-test")
+        http.cookies.set("prefs", '"x; _vercel_jwt=jwt-secret-test')
+    options: dict[str, Any] = {"base_url": "https://provider.example", "api_key": PROVIDER}
+    options["http_async_client" if asynchronous else "http_client"] = http
+    await send(build(drex, **options), asynchronous=asynchronous)
+    sent = drex.requests[0].headers
+    assert "jwt" not in " ".join(sent.get_list("cookie")).lower()
+    assert "jwt-secret-test" not in str(sent)
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("cookie", _HIDDEN_COOKIES)
+async def test_malformed_cookie_field_is_kept_for_nace_production(
+    ambient: None, drex: FakeDrex, asynchronous: bool, cookie: str
+) -> None:
+    client = build(drex, default_headers={"Cookie": cookie})
+    await send(client, asynchronous=asynchronous)
+    assert drex.requests[0].headers.get_list("cookie") == [cookie]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_only_the_field_that_still_holds_the_bypass_cookie_is_dropped(
+    asynchronous: bool,
+) -> None:
+    request = httpx.Request(
+        "POST",
+        "https://provider.example/v1/systemone",
+        headers=[
+            (b"X-Nace-Integration", b"llama-index-nace"),
+            (b"Cookie", b'prefs="; _vercel_jwt=jwt-secret-test'),
+            (b"Cookie", b'a="x\\"; _vercel_jwt=no"; _vercel_jwt=t'),
+            (b"Cookie", b'ok="a,b"; _vercel_jwt=t'),
+        ],
+    )
+    if asynchronous:
+        await aguard_request(request)
+    else:
+        guard_request(request)
+    assert [v for n, v in request.headers.raw if n.lower() == b"cookie"] == [b'ok="a,b"']

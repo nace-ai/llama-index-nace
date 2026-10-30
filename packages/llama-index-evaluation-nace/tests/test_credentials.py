@@ -952,3 +952,79 @@ async def test_comma_joined_cookie_field_is_filtered(
     else:
         guard_request(request)
     assert [v for n, v in request.headers.raw if n.lower() == b"cookie"] == expected
+
+
+# --- IDNA separators: decide on the host httpx will connect to ---------------------------------
+
+SEPARATORS = ["\u3002", "\uff0e", "\uff61"]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("via", ["argument", "environment"])
+@pytest.mark.parametrize("separator", SEPARATORS)
+async def test_openrouter_host_with_idna_separator_gets_openrouter_key(
+    ambient: None,
+    monkeypatch: pytest.MonkeyPatch,
+    drex: FakeDrex,
+    separator: str,
+    via: str,
+    asynchronous: bool,
+) -> None:
+    url = f"https://OpenRouter{separator}ai/api/v1"
+    kwargs: dict[str, Any] = {}
+    if via == "argument":
+        kwargs["base_url"] = url
+    else:
+        monkeypatch.setenv("NACE_BASE_URL", url)
+    with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
+        build(drex, **kwargs)
+    monkeypatch.setenv("OPENROUTER_API_KEY", OPENROUTER_KEY)
+    await send(build(drex, **kwargs), asynchronous=asynchronous)
+    assert bearer(drex) == f"Bearer {OPENROUTER_KEY}"
+    assert drex.requests[0].url.host == "openrouter.ai"
+
+
+@pytest.mark.parametrize("via", ["argument", "environment"])
+@pytest.mark.parametrize("separator", SEPARATORS)
+def test_insecure_nace_host_with_idna_separator_is_still_nace(
+    monkeypatch: pytest.MonkeyPatch, drex: FakeDrex, separator: str, via: str
+) -> None:
+    url = f"http://console{separator}nace{separator}ai"
+    kwargs: dict[str, Any] = {"api_key": PROVIDER}
+    if via == "argument":
+        kwargs["base_url"] = url
+    else:
+        monkeypatch.setenv("NACE_BASE_URL", url)
+    with pytest.raises(ValueError, match="HTTPS"):
+        build(drex, **kwargs)
+    assert drex.requests == []
+
+
+@pytest.mark.parametrize("separator", SEPARATORS)
+def test_nace_host_with_idna_separator_is_nace_production(
+    ambient: None, drex: FakeDrex, separator: str
+) -> None:
+    build(drex, base_url=f"https://console{separator}nace{separator}ai").ask(*CALL)
+    assert bearer(drex) == f"Bearer {AMBIENT}"
+    assert drex.requests[0].url.host == "console.nace.ai"
+
+
+FULLWIDTH_URLS = [
+    "https://\uff2f\uff30\uff25\uff2e\uff32\uff2f\uff35\uff34\uff25\uff32.ai",
+    "https://\uff43\uff4f\uff4e\uff53\uff4f\uff4c\uff45.nace.ai",
+]
+
+
+@pytest.mark.parametrize("via", ["argument", "environment"])
+@pytest.mark.parametrize("url", FULLWIDTH_URLS)
+def test_fullwidth_hosts_are_refused(
+    ambient: None, monkeypatch: pytest.MonkeyPatch, drex: FakeDrex, url: str, via: str
+) -> None:
+    kwargs: dict[str, Any] = {"api_key": PROVIDER}
+    if via == "argument":
+        kwargs["base_url"] = url
+    else:
+        monkeypatch.setenv("NACE_BASE_URL", url)
+    with pytest.raises(ValueError, match="absolute"):
+        build(drex, **kwargs)
+    assert drex.requests == []

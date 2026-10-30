@@ -70,19 +70,26 @@ def _host(hostname: str | None) -> str:
     return address + percent + zone
 
 
-def _netloc_host(netloc: str) -> str:
-    """The host part of `netloc`, case untouched (`urlsplit().hostname` lower-cases it all)."""
-    host = netloc.rpartition("@")[2]
-    if host.startswith("["):
-        return host[1:].partition("]")[0]
-    return host.partition(":")[0]
+def _connect_host(url: str) -> str | None:
+    """The host httpx will connect to for `url`, or None when httpx would refuse the URL.
+
+    httpx normalizes IDNA (`openrouter\u3002ai` is `openrouter.ai`), so every decision (Nace
+    production, OpenRouter, origin comparison) is taken on this host, not on the raw text.
+    """
+    try:
+        return httpx.URL(url).raw_host.decode("ascii")
+    except (httpx.InvalidURL, ValueError):
+        return None
 
 
 def _split(url: str) -> tuple[str, str, int | None] | None:
     """Scheme, normalized host and explicit port, or None when `url` can't be parsed."""
+    host = _connect_host(url)
+    if host is None:
+        return None
     try:
         parts = urlsplit(url)
-        return parts.scheme.lower(), _host(_netloc_host(parts.netloc)), parts.port
+        return parts.scheme.lower(), _host(host), parts.port
     except ValueError:
         return None
 
@@ -124,7 +131,10 @@ def _normalize(url: str) -> str:
     except ValueError:
         raise ValueError(_INVALID_URL) from None
     scheme = parts.scheme.lower()
-    host = _host(_netloc_host(parts.netloc))
+    sent = _connect_host(url)
+    if sent is None:
+        raise ValueError(_INVALID_URL)
+    host = _host(sent)
     if (
         port == 0
         or scheme not in {"http", "https"}

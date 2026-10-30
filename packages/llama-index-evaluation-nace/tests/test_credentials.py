@@ -465,3 +465,45 @@ async def test_openrouter_key_for_explicit_https_443(
     client = build(drex, base_url="https://OpenRouter.ai.:443/api/v1")
     await send(client, asynchronous=asynchronous)
     assert bearer(drex) == f"Bearer {OPENROUTER_KEY}"
+
+
+@pytest.mark.parametrize("env_name", ["NACE_API_KEY", "DREX_API_KEY"])
+@pytest.mark.parametrize("with_openrouter_key", [False, True])
+@pytest.mark.parametrize("base_url_name", ["NACE_BASE_URL", "DREX_BASE_URL"])
+def test_openrouter_mode_on_env_host_never_sends_nace_key(
+    monkeypatch: pytest.MonkeyPatch,
+    drex: FakeDrex,
+    env_name: str,
+    with_openrouter_key: bool,
+    base_url_name: str,
+) -> None:
+    monkeypatch.setenv(base_url_name, "https://gateway.example/api/v1")
+    monkeypatch.setenv(env_name, AMBIENT)
+    if with_openrouter_key:
+        monkeypatch.setenv("OPENROUTER_API_KEY", OPENROUTER_KEY)
+    with pytest.raises(ValueError, match="OPENROUTER_API_KEY") as error:
+        build(drex, openrouter=True)
+    assert "api_key=" in str(error.value)
+    assert drex.requests == []
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_openrouter_mode_on_env_host_with_explicit_key(
+    ambient: None, monkeypatch: pytest.MonkeyPatch, drex: FakeDrex, asynchronous: bool
+) -> None:
+    monkeypatch.setenv("NACE_BASE_URL", "https://gateway.example/api/v1")
+    monkeypatch.setenv("OPENROUTER_API_KEY", OPENROUTER_KEY)
+    client = build(drex, openrouter=True, api_key=PROVIDER)
+    await send(client, asynchronous=asynchronous)
+    assert bearer(drex) == f"Bearer {PROVIDER}"
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_env_on_prem_without_openrouter_flag_keeps_nace_key(
+    monkeypatch: pytest.MonkeyPatch, drex: FakeDrex, asynchronous: bool
+) -> None:
+    monkeypatch.setenv("NACE_BASE_URL", "https://gateway.example/api/v1")
+    monkeypatch.setenv("NACE_API_KEY", ONPREM)
+    monkeypatch.setenv("OPENROUTER_API_KEY", OPENROUTER_KEY)
+    await send(build(drex), asynchronous=asynchronous)
+    assert bearer(drex) == f"Bearer {ONPREM}"

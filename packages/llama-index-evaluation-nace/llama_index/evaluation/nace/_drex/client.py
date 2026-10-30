@@ -98,7 +98,7 @@ class DrexClient:
         if self.openrouter and destination.source == "default":
             message = "openrouter=True needs a base_url, such as https://openrouter.ai/api/v1."
             raise ValueError(message)
-        resolved_key = resolve_api_key(api_key, destination)
+        resolved_key = resolve_api_key(api_key, destination, openrouter=self.openrouter)
 
         headers = dict(default_headers or {})
         if self.openrouter:

@@ -53,7 +53,7 @@ evaluator = NaceFaithfulnessEvaluator(
 - The ambient `OPENROUTER_API_KEY` is only used for `https://openrouter.ai` on port 443. The same host over `http`, or on another port, needs an explicit `api_key=`.
 - Internal deployment headers are only sent to `https://console.nace.ai` and `https://drex.nace.ai`.
 - When you pass `http_client` / `http_async_client`, Drex requests on them refuse redirects to another origin (scheme, host or port); your other requests on those clients are untouched.
-- Set `openrouter=True` for an OpenRouter-format host other than `openrouter.ai`, and pass its key as `api_key=`.
+- Set `openrouter=True` for an OpenRouter-format host other than `openrouter.ai`, and pass its key as `api_key=`. In OpenRouter mode (the flag, or the host `openrouter.ai`) the Nace key is never used, not even when `NACE_BASE_URL` points at that host: the client takes `api_key=`, or `OPENROUTER_API_KEY` for `https://openrouter.ai`, and otherwise refuses to start.
 
 ## Quick start
 

@@ -28,7 +28,8 @@ _REFUSED_CUSTOM = (
     "NACE_API_KEY is only sent to Nace, or to NACE_BASE_URL when you set both."
 )
 _OPENROUTER_KEY = (
-    "OpenRouter needs api_key= or OPENROUTER_API_KEY; NACE_API_KEY is never sent to OpenRouter."
+    "OpenRouter mode needs api_key=, or OPENROUTER_API_KEY for https://openrouter.ai; "
+    "NACE_API_KEY is never sent in OpenRouter mode."
 )
 _NO_KEY = "No API key was provided. Pass api_key or set the NACE_API_KEY environment variable."
 _BLANK_KEY = "api_key must not be empty."
@@ -134,13 +135,16 @@ def resolve_destination(base_url: str | None) -> Destination:
     return Destination(_normalize(DEFAULT_BASE_URL), "default")
 
 
-def resolve_api_key(api_key: str | None, destination: Destination) -> str:
+def resolve_api_key(
+    api_key: str | None, destination: Destination, *, openrouter: bool = False
+) -> str:
     """The key for `destination`: an explicit one, else the only ambient key allowed there.
 
     - An explicit `api_key` always wins; a blank one is refused, never replaced from the
       environment.
-    - OpenRouter only ever gets `OPENROUTER_API_KEY`, and that ambient key only goes to
-      `https://openrouter.ai` on port 443; the same host over another scheme or port needs an
+    - In OpenRouter mode (`openrouter` true, or the host is `openrouter.ai`) the ambient key is
+      never `NACE_API_KEY` / `DREX_API_KEY`: it is `OPENROUTER_API_KEY`, and only for
+      `https://openrouter.ai` on port 443. Any other OpenRouter-mode destination needs an
       explicit `api_key`.
     - Nace production gets `NACE_API_KEY`, else legacy `DREX_API_KEY`.
     - Another origin gets that same pair only when the operator chose it through the
@@ -154,7 +158,7 @@ def resolve_api_key(api_key: str | None, destination: Destination) -> str:
         if not api_key.strip():
             raise ValueError(_BLANK_KEY)
         return api_key.strip()
-    if is_openrouter_host(destination.url):
+    if openrouter or is_openrouter_host(destination.url):
         if is_openrouter_production(destination.url) and (key := _env("OPENROUTER_API_KEY")):
             return key
         raise ValueError(_OPENROUTER_KEY)

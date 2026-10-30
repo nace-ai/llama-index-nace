@@ -698,3 +698,48 @@ async def test_repeated_cookie_fields_kept_for_nace_production(
         "_vercel_jwt=jwt-test",
         "session=ok",
     ]
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("name", ["my-app/1.0", "llama-index-selectors-nacex/1", ""])
+async def test_custom_client_name_is_still_guarded(
+    ambient: None, drex: FakeDrex, asynchronous: bool, name: str
+) -> None:
+    sync_http, async_http = following_clients(drex, headers={BYPASS: "client-default"})
+    client = DrexClient(
+        name,
+        base_url="https://provider.example",
+        api_key=PROVIDER,
+        default_headers={BYPASS_COOKIE: "true", "Cookie": "_vercel_jwt=jwt-test; a=1"},
+        http_client=sync_http,
+        http_async_client=async_http,
+        max_retries=0,
+    )
+    redirecting(drex, "https://attacker.example/v1/systemone")
+    with pytest.raises(NaceRedirectError, match="different origin"):
+        await send(client, asynchronous=asynchronous)
+    assert [r.url.host for r in drex.requests] == ["provider.example"]
+    sent = drex.requests[0].headers
+    assert BYPASS not in sent
+    assert BYPASS_COOKIE not in sent
+    assert sent["cookie"] == "a=1"
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+async def test_integration_marker_cannot_be_overridden_by_default_headers(
+    ambient: None, drex: FakeDrex, asynchronous: bool
+) -> None:
+    sync_http, async_http = following_clients(drex)
+    client = DrexClient(
+        "my-app/1.0",
+        base_url="https://provider.example",
+        api_key=PROVIDER,
+        default_headers={"x-nace-integration": "other"},
+        http_client=sync_http,
+        http_async_client=async_http,
+        max_retries=0,
+    )
+    redirecting(drex, "https://attacker.example/v1/systemone")
+    with pytest.raises(NaceRedirectError, match="different origin"):
+        await send(client, asynchronous=asynchronous)
+    assert drex.requests[0].headers.get_list("x-nace-integration") == ["llama-index-nace"]

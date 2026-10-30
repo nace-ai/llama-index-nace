@@ -21,9 +21,11 @@ NACE_PRODUCTION_HOSTS = frozenset({"console.nace.ai", "drex.nace.ai"})
 OPENROUTER_HOST = "openrouter.ai"
 ORIGIN_EXTENSION = "llama_index_nace.origin"
 BYPASS_HEADERS = ("x-vercel-protection-bypass", "x-vercel-set-bypass-cookie")
-# `X-Nace-Client` values of requests this integration owns; the SDK-wide `X-Nace-SDK` header is
-# on every SDK request, including other users' clients that share an httpx client.
-OWNED_CLIENT_PREFIXES = ("llama-index-selectors-nace/", "llama-index-evaluation-nace/")
+# Marker header `DrexClient` adds to every request it sends, whatever its client name. The hook
+# keys on it, not on the free-form `X-Nace-Client` name or the SDK-wide `X-Nace-SDK` header, which
+# is on every SDK request, including other users' clients that share an httpx client.
+INTEGRATION_HEADER = "X-Nace-Integration"
+INTEGRATION_MARKER = "llama-index-nace"
 BYPASS_COOKIES = frozenset({"_vercel_jwt"})
 _DEFAULT_PORTS = {"http": 80, "https": 443}
 
@@ -212,8 +214,8 @@ def _strip_bypass_cookies(request: httpx.Request) -> None:
 def guard_request(request: httpx.Request) -> None:
     """Request hook for every httpx client a `DrexClient` uses; sync and async share it.
 
-    Acts only on requests this integration sends (`X-Nace-Client` starts with one of
-    `OWNED_CLIENT_PREFIXES`), so other traffic on a shared client, including a standalone
+    Acts only on requests this integration sends (they carry the `X-Nace-Integration` marker
+    header, whatever the client name), so other traffic on a shared client, including a standalone
     `nace_sdk` client, is left alone, and is idempotent, because several `DrexClient`s (and
     both packages' copies of this hook) may sit on one client.
 
@@ -229,8 +231,7 @@ def guard_request(request: httpx.Request) -> None:
         nace_sdk.NaceError: The request left its first origin.
 
     """
-    name = request.headers.get("x-nace-client", "")
-    if not name.startswith(OWNED_CLIENT_PREFIXES):
+    if request.headers.get(INTEGRATION_HEADER) != INTEGRATION_MARKER:
         return
     url = request.url
     scheme = url.scheme.lower()
@@ -244,7 +245,8 @@ def guard_request(request: httpx.Request) -> None:
         for header in BYPASS_HEADERS:
             request.headers.pop(header, None)
         _strip_bypass_cookies(request)
-    request.headers["User-Agent"] = name
+    if name := request.headers.get("x-nace-client"):
+        request.headers["User-Agent"] = name
 
 
 async def aguard_request(request: httpx.Request) -> None:

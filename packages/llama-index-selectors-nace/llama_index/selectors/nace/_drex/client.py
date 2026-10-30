@@ -20,6 +20,8 @@ from .errors import (
 )
 from .images import as_data_url, to_drex_image
 from .origins import (
+    INTEGRATION_HEADER,
+    INTEGRATION_MARKER,
     aguard_request,
     guard_request,
     is_openrouter_host,
@@ -104,6 +106,10 @@ class DrexClient:
         if self.openrouter:
             headers.setdefault("HTTP-Referer", "https://nace.ai")
             headers.setdefault("X-OpenRouter-Title", "Drex for LlamaIndex")
+        # The hook below recognizes this integration's requests by this marker, not by the
+        # caller-chosen client name; a caller header of that name never replaces it.
+        headers = {k: v for k, v in headers.items() if k.lower() != INTEGRATION_HEADER.lower()}
+        headers[INTEGRATION_HEADER] = INTEGRATION_MARKER
         self._owns_http = http_client is None
         self._owns_async_http = http_async_client is None
         # Owned clients never follow redirects; a supplied one may, and the hook below then

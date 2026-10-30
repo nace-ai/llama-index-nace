@@ -60,6 +60,21 @@ class Usage(BaseModel):
     image_tokens: int | None = None
 
 
+MAX_MESSAGE_CHARS = 200
+# The only path segments an error message may name: this package's own schema fields. Every
+# other segment (dict keys, list indexes) comes from the response and is replaced.
+_SCHEMA_FIELDS = frozenset(
+    name for model in (NoulAnswer, ChoiceAnswer, ScoreAnswer, Usage) for name in model.model_fields
+)
+
+
+def _safe_path(loc: tuple[int | str, ...]) -> str:
+    """Render a pydantic error location naming schema fields only, never response keys."""
+    return "".join(
+        f".{part}" if isinstance(part, str) and part in _SCHEMA_FIELDS else ".<key>" for part in loc
+    )
+
+
 class DrexResponse(BaseModel):
     """Answers and metadata from one Drex request."""
 
@@ -80,14 +95,11 @@ class DrexResponse(BaseModel):
                 answers[name] = _parse_answer(raw)
             except ValidationError as error:
                 first = error.errors()[0]["loc"] if error.errors() else ()
-                invalid = ".".join(str(part) for part in first)
+                invalid = _safe_path(first)
             # Raised outside the `except` so no exception context (and no value) is attached.
             if invalid is not None:
-                message = (
-                    f"Drex returned an invalid answer at answers.{str(name)[:80]}"
-                    f"{'.' + invalid if invalid else ''}."
-                )
-                raise NaceAPIResponseValidationError(message)
+                message = f"Drex returned an invalid answer at answers.<answer>{invalid}."
+                raise NaceAPIResponseValidationError(message[:MAX_MESSAGE_CHARS])
         return cls(
             model=str(body.get("model", "")),
             answers=answers,

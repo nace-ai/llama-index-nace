@@ -93,6 +93,12 @@ drex-max-v1.1 is 17.2 points more accurate on matched faithfulness at about 1/9 
 drex-v2.0 is less accurate and, at $0.06 against $0.03 per 1M tokens, about 1.5x the cost.
 Latency is wall time from one machine, one run per cell (see the benchmark caveats).
 
+## Security
+
+Versions 0.1.0 and 0.1.1 could send `NACE_API_KEY` (or `DREX_API_KEY`) to a custom `base_url` or to OpenRouter, and could forward internal deployment headers to other hosts, including through an HTTP client that follows redirects. Upgrade to 0.1.2. If you used a custom `base_url` or OpenRouter while `NACE_API_KEY` was set, revoke that key in Nace Console and create a new one; upgrading cannot revoke a key that already reached another host.
+
+See the [changelog](https://github.com/nace-ai/llama-index-nace/blob/main/CHANGELOG.md) for the full list of changes.
+
 ## Releasing
 
 When Drex ships a new default model, update the packages' default by hand:
@@ -114,5 +120,5 @@ When Drex ships a new default model, update the packages' default by hand:
 6. Bump `_version.py` in both packages: each ships its own `_drex/` copy, so a default-model
    change needs a release of both. The tests read the client name from `__version__`, so the
    bump needs no test change.
-7. Tag `selectors-vX.Y.Z` and `evaluation-vX.Y.Z`; `.github/workflows/release.yml` checks the
+7. Add the release to `CHANGELOG.md` and tag `selectors-vX.Y.Z` and `evaluation-vX.Y.Z`; `.github/workflows/release.yml` checks the
    tag against `_version.py`, builds and publishes to PyPI.

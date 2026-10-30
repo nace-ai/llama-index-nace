@@ -54,3 +54,7 @@ Call `close()` (or `await aclose()`) to release the HTTP connections an evaluato
 Evaluators read `ImageNode` sources (`image_path`, base64 `image`, or a `data:` URL) and send them to Drex. The default model, `drex-max-v1.1`, reads images; when `NACE_DEFAULT_DECISION_MODEL` names a text-only model, requests with images still go to `drex-max-v1.1`, and an explicit text-only `model=` with images raises `NaceImageModelError`. `image_urls=` and `ImageNode.image_url` take `data:` URLs only; pass files as `image_paths` (a file path in a URL field is refused, never read). `http(s)` image URLs are refused, because Drex never fetches URLs. `max_images=N` keeps the N highest-scored image nodes, whatever their count; without it, more than 8 images (Drex's per-request limit) raise `NaceImageLimitError` rather than being trimmed silently. Strict faithfulness on image-only sources tends to score lower than on text; compare probabilities rather than trusting the default cut-off.
 
 See [`examples/`](https://github.com/nace-ai/llama-index-nace/tree/main/examples) for runnable scripts and notebooks.
+
+## Security
+
+Versions 0.1.0 and 0.1.1 could send `NACE_API_KEY` (or `DREX_API_KEY`) to a custom `base_url` or to OpenRouter, and could forward internal deployment headers to other hosts, including through an HTTP client that follows redirects. Upgrade to 0.1.2. See the [security note and changelog](https://github.com/nace-ai/llama-index-nace/blob/main/CHANGELOG.md) for details.

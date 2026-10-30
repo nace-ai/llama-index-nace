@@ -60,3 +60,7 @@ Call `close()` (or `await aclose()`) to release the HTTP connections a selector 
 If `QueryBundle.image_path` is set, the image is sent. The default model, `drex-max-v1.1`, reads images; when `NACE_DEFAULT_DECISION_MODEL` names a text-only model, image queries still go to `drex-max-v1.1`. An explicit text-only `model=` with an image raises `NaceImageModelError`. A missing file raises `NaceImageError` before any request.
 
 See [`examples/`](https://github.com/nace-ai/llama-index-nace/tree/main/examples) for runnable scripts and notebooks.
+
+## Security
+
+Versions 0.1.0 and 0.1.1 could send `NACE_API_KEY` (or `DREX_API_KEY`) to a custom `base_url` or to OpenRouter, and could forward internal deployment headers to other hosts, including through an HTTP client that follows redirects. Upgrade to 0.1.2. See the [security note and changelog](https://github.com/nace-ai/llama-index-nace/blob/main/CHANGELOG.md) for details.

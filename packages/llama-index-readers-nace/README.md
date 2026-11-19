@@ -62,7 +62,8 @@ Parse output is untrusted data: it can repeat instructions that are written in t
 - URL sources must be `https://` links with a file extension; download other links and pass the file.
 - Accounts with Zero retention cannot upload local files (the API answers 422); pass a URL instead.
 - This is a reader, not a retriever: NDI has no endpoint that returns ranked passages with scores.
-- The metadata `url` of a URL source has no userinfo, query or fragment, because a signed link can hold a token.
+- The metadata `url` that the reader sets for a URL source has no userinfo, query or fragment, because a signed link can hold a token. `extra_info` is merged last and can replace it.
+- A local file is sent to the upload host that Nace names (a different host from the API). The reader sends no API key there. An `http_client` that you supply adds its own default headers to every request, this upload included, so do not put credentials for other services in its default headers.
 - With `chunking_strategy` set, a file for which NDI returns no chunks comes back as one `Document` with the whole text.
 - If a request fails after Nace accepted a job or a large multi-part upload (for example a 503 `job_pending`), the reader has no id to delete; look for leftovers under `llama-index-readers-nace/` and in the job list.
 

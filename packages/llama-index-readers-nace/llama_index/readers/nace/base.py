@@ -102,12 +102,13 @@ class NaceReader(BaseReader):
             is always `["markdown"]`, and `source`, `parse_mode`, `chunking`, `wait_seconds`
             and the SDK transport arguments are refused here.
         job_timeout: Seconds to wait for a parse job that is not finished when the create
-            request returns. The create itself is held open for the same number of
-            seconds, between 1 and 60. A finite number above 0.
+            request returns. The create itself is held open for that time in whole
+            seconds (rounded down), between 1 and 60. A finite number above 0.
         timeout: HTTP timeout in seconds; at least 60, because a parse create is held open.
         max_retries: HTTP retries per SDK call.
         http_client: An `httpx.Client` to send the requests on. It stays the caller's:
-            `close()` leaves it open.
+            `close()` leaves it open. Its own default headers go out with every request it
+            sends, the upload to the Nace document service host included.
 
     """
 
@@ -274,7 +275,7 @@ class NaceReader(BaseReader):
         if fs is None:
             uploaded = self._sdk.documents.upload(path, path=target)
         else:
-            with fs.open(str(path), "rb") as handle:
+            with fs.open(os.fspath(path), "rb") as handle:
                 uploaded = self._sdk.documents.upload(handle, file_name=file_name, path=target)
         return uploaded, file_name
 

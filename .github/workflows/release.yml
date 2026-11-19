@@ -2,6 +2,7 @@ name: Release
 
 # Tag selectors-v<version>   -> build and publish llama-index-selectors-nace
 # Tag evaluation-v<version>  -> build and publish llama-index-evaluation-nace
+# Tag readers-v<version>     -> build and publish llama-index-readers-nace
 # Publishing uses PyPI trusted publishing (no token). Each PyPI project must list this
 # repository, workflow (release.yml) and environment (pypi) as a trusted publisher.
 
@@ -10,6 +11,7 @@ on:
     tags:
       - "selectors-v*"
       - "evaluation-v*"
+      - "readers-v*"
 
 permissions:
   contents: read
@@ -38,6 +40,11 @@ jobs:
               version_file=packages/llama-index-evaluation-nace/llama_index/evaluation/nace/_version.py
               tag_version="${GITHUB_REF_NAME#evaluation-v}"
               ;;
+            readers-v*)
+              package=llama-index-readers-nace
+              version_file=packages/llama-index-readers-nace/llama_index/readers/nace/_version.py
+              tag_version="${GITHUB_REF_NAME#readers-v}"
+              ;;
             *)
               echo "Unexpected tag $GITHUB_REF_NAME" >&2
               exit 1
@@ -57,7 +64,7 @@ jobs:
       - name: Wheel must not contain namespace __init__ files
         run: |
           for whl in dist/*.whl; do
-            for f in llama_index/__init__.py llama_index/selectors/__init__.py llama_index/evaluation/__init__.py; do
+            for f in llama_index/__init__.py llama_index/selectors/__init__.py llama_index/evaluation/__init__.py llama_index/readers/__init__.py; do
               if unzip -l "$whl" | grep -q " $f\$"; then
                 echo "$whl contains $f" >&2
                 exit 1

@@ -11,6 +11,7 @@ members = ["packages/*"]
 [tool.uv.sources]
 llama-index-selectors-nace = { workspace = true }
 llama-index-evaluation-nace = { workspace = true }
+llama-index-readers-nace = { workspace = true }
 
 [dependency-groups]
 test = [
@@ -28,6 +29,7 @@ docs = ["jupyter>=1.1", "nbconvert>=7.16", "ipykernel>=6.29"]
 dev = [
     "llama-index-selectors-nace",
     "llama-index-evaluation-nace",
+    "llama-index-readers-nace",
     { include-group = "test" },
     { include-group = "lint" },
     { include-group = "docs" },
@@ -55,13 +57,23 @@ strict = true
 python_version = "3.11"
 namespace_packages = true
 explicit_package_bases = true
-mypy_path = ["packages/llama-index-selectors-nace", "packages/llama-index-evaluation-nace"]
+mypy_path = [
+    "packages/llama-index-selectors-nace",
+    "packages/llama-index-evaluation-nace",
+    "packages/llama-index-readers-nace",
+]
 files = [
     "packages/llama-index-selectors-nace/llama_index",
     "packages/llama-index-evaluation-nace/llama_index",
+    "packages/llama-index-readers-nace/llama_index",
 ]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 module = ["nace_sdk.*"]
 follow_imports = "normal"
+
+[[tool.mypy.overrides]]
+# fsspec ships no py.typed; `fs=` params are typed through llama-index-core's own use of it.
+module = ["fsspec.*"]
+ignore_missing_imports = true

@@ -1,12 +1,18 @@
 # Changelog
 
-All notable changes to `llama-index-selectors-nace` and `llama-index-evaluation-nace` are listed here.
-Both packages are released together with the same version number.
+All notable changes to `llama-index-selectors-nace`, `llama-index-evaluation-nace` and
+`llama-index-readers-nace` are listed here. The selectors and evaluation packages are released
+together with the same version number; the reader package has its own.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packages follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+- `llama-index-readers-nace` 0.1.0: `NaceReader`, a LlamaIndex reader that parses files into
+  `Document` objects with NDI (Nace Document Intelligence).
 
 ## [0.1.2] - 2026-10-30
 

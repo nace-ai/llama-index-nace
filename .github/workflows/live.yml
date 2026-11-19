@@ -1,6 +1,6 @@
 name: Live
 
-# Real calls to Drex (billed). Nightly and on demand; never on pull requests.
+# Real calls to Nace (billed). Nightly and on demand; never on pull requests.
 on:
   schedule:
     - cron: "17 3 * * *"
@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [llama-index-selectors-nace, llama-index-evaluation-nace]
+        package: [llama-index-selectors-nace, llama-index-evaluation-nace, llama-index-readers-nace]
     env:
       NACE_API_KEY_LIVE: ${{ secrets.NACE_API_KEY_LIVE }}
       OPENROUTER_API_KEY_LIVE: ${{ secrets.OPENROUTER_API_KEY_LIVE }}

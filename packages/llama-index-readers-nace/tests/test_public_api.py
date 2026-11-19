@@ -28,6 +28,8 @@ def test_public_errors_exported(name: str) -> None:
 
 def test_reader_is_exported() -> None:
     assert package.NaceReader is NaceReader
+    assert "NaceReader" in package.__all__
+    assert "__version__" in package.__all__
     assert package.__version__
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -38,6 +39,11 @@ BAD_INPUTS = [
     ({"parse_mode": "turbo"}, URL, "parse_mode must be one of"),
     ({"chunking_strategy": "chapter"}, URL, "chunking_strategy must be one of"),
     ({"parse_options": {"chunking": {"strategy": "page"}}}, URL, "parse_options must not contain"),
+    (
+        {"parse_options": {"extra_body": {"formats": ["text"]}}},
+        URL,
+        "parse_options must not contain",
+    ),
     ({}, "http://example.test/files/report.pdf", "https links only"),
     ({}, "https://example.test/files/report", "no file extension"),
 ]
@@ -52,7 +58,18 @@ UNREADABLE_RESULTS: list[Any] = [
             "page_count": 1,
         }
     },
+    {
+        "document": {
+            "markdown": MARKDOWN,
+            "chunks": [],
+            "content_url": CONTENT_URL,
+            "page_count": 1,
+        },
+        "disclosures": {"code": "content_truncated"},
+    },
 ]
+#: Every upload goes to `llama-index-readers-nace/<32 hex digits>/<file name>`.
+UPLOAD_PATH = r"llama-index-readers-nace/[0-9a-f]{32}/report\.pdf"
 
 
 def test_local_file_uploaded_parsed_and_cleaned_up(
@@ -66,7 +83,7 @@ def test_local_file_uploaded_parsed_and_cleaned_up(
     assert metadata["file_name"] == "report.pdf"
     assert metadata["origin"] == "intranet"
     assert ndi.routes == ["grant", "upload", "parse", "delete-job", "delete-file"]
-    assert ndi.bodies[0]["path"] == "report.pdf"
+    assert re.fullmatch(UPLOAD_PATH, ndi.bodies[0]["path"])
     assert b"made-up pdf bytes" in ndi.requests[1].content
     upload = ndi.requests[1]
     assert upload.url.host == "upload.test"
@@ -116,16 +133,23 @@ def test_failed_job_raises_and_cleans_up(
             {},
             job_body(
                 status="failed",
-                error={"code": "unreadable_file", "message": "the document could not be read"},
+                error={
+                    "code": "unreadable_file",
+                    "message": "could not fetch "
+                    "https://example.test/files/report.pdf?token=made-up-token for parsing",
+                },
             ),
         )
     ]
     source = tmp_path / "report.pdf"
     source.write_bytes(b"made-up pdf bytes")
-    with pytest.raises(
-        NaceError, match=r"NDI parse failed for report\.pdf: the document could not be read"
-    ):
+    with pytest.raises(NaceError) as raised:
         make_reader().load_data(source)
+    message = str(raised.value)
+    assert "NDI parse failed for report.pdf: could not fetch <url> for parsing" in message
+    assert "<url>" in message
+    assert "made-up-token" not in message
+    assert "example.test/files" not in message
     assert ndi.routes == ["grant", "upload", "parse", "delete-job", "delete-file"]
 
 
@@ -209,6 +233,48 @@ def test_cleanup_failure_warns_and_still_returns_documents(
     warnings = [record.getMessage() for record in caplog.records if record.levelname == "WARNING"]
     assert any(JOB_ID in text and "NaceNotFoundError" in text for text in warnings)
     assert any(FILE_ID in text and "NaceNotFoundError" in text for text in warnings)
+    # A deletion the server is still running warns the same way and changes nothing else.
+    ndi.requests.clear()
+    caplog.clear()
+    ndi.replies["delete-file"] = [
+        (
+            200,
+            {},
+            {
+                "object": "file_deletion",
+                "workspace_id": WORKSPACE_ID,
+                "file_id": FILE_ID,
+                "status": "deleting",
+            },
+        )
+    ]
+    documents = make_reader().load_data(source)
+    assert [document.text for document in documents] == [MARKDOWN]
+    warnings = [record.getMessage() for record in caplog.records if record.levelname == "WARNING"]
+    assert f"deletion of NDI file {FILE_ID} is still running" in warnings
+
+
+def test_job_deletion_crash_still_deletes_the_file(
+    make_reader: MakeReader,
+    ndi: FakeNdi,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "report.pdf"
+    source.write_bytes(b"made-up pdf bytes")
+    reader = make_reader()
+
+    def crash(job_id: object) -> None:
+        raise RuntimeError("made-up crash")
+
+    monkeypatch.setattr(reader._sdk.jobs, "delete", crash)
+    with caplog.at_level("WARNING"):
+        documents = reader.load_data(source)
+    assert [document.text for document in documents] == [MARKDOWN]
+    assert "delete-file" in ndi.routes
+    warnings = [record.getMessage() for record in caplog.records if record.levelname == "WARNING"]
+    assert any(JOB_ID in text and "RuntimeError" in text for text in warnings)
 
 
 def test_fs_bytes_are_uploaded_with_the_file_name(make_reader: MakeReader, ndi: FakeNdi) -> None:
@@ -219,7 +285,7 @@ def test_fs_bytes_are_uploaded_with_the_file_name(make_reader: MakeReader, ndi: 
     assert [document.text for document in documents] == [MARKDOWN]
     assert documents[0].metadata["file_name"] == "report.pdf"
     assert ndi.routes == ["grant", "upload", "parse", "delete-job", "delete-file"]
-    assert ndi.bodies[0]["path"] == "report.pdf"
+    assert re.fullmatch(UPLOAD_PATH, ndi.bodies[0]["path"])
     assert b"made-up pdf bytes" in ndi.requests[1].content
 
 

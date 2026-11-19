@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import tempfile
+import uuid
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -35,8 +37,21 @@ CLIENT_NAME = f"llama-index-readers-nace/{__version__}"
 
 PARSE_MODES = ("low", "medium", "high")
 CHUNKING_STRATEGIES = ("page", "section")
-#: `parse` parameters the reader owns; setting them through `parse_options` is a mistake.
-RESERVED_PARSE_OPTIONS = frozenset({"source", "parse_mode", "chunking", "wait_seconds"})
+#: `parse` parameters the reader owns, and the SDK's transport arguments; `extra_body` could
+#: replace `source` or `formats`, and `extra_headers` the integration marker header.
+RESERVED_PARSE_OPTIONS = frozenset(
+    {
+        "source",
+        "parse_mode",
+        "chunking",
+        "wait_seconds",
+        "extra_body",
+        "extra_headers",
+        "idempotency_key",
+        "retry",
+        "timeout",
+    }
+)
 OPENROUTER_REFUSAL = "NDI is not available through OpenRouter; use https://console.nace.ai."
 HTTPS_ONLY = "NDI reads https links only; download the file and pass its path instead."
 NO_EXTENSION = (
@@ -83,9 +98,10 @@ class NaceReader(BaseReader):
         chunking_strategy: `page` or `section` for one `Document` per chunk; `None` for one
             `Document` per file.
         parse_options: Extra Parse options passed to NDI (for example `output`); `formats`
-            is always `["markdown"]` and `source`, `parse_mode`, `chunking` and
-            `wait_seconds` are refused here.
-        job_timeout: Seconds to wait for a parse job.
+            is always `["markdown"]`, and `source`, `parse_mode`, `chunking`, `wait_seconds`
+            and the SDK transport arguments are refused here.
+        job_timeout: Seconds to wait for a parse job. The parse create is held open for at
+            most this many seconds, between 1 and 60; a longer wait polls instead.
         timeout: HTTP timeout in seconds; at least 60, because a parse create is held open.
         max_retries: HTTP retries per SDK call.
         http_client: An `httpx.Client` to send the requests on. It stays the caller's:
@@ -209,7 +225,9 @@ class NaceReader(BaseReader):
                 source, url = uploaded.as_source(), None
             job = self._sdk.documents.parse(
                 source,
-                wait_seconds=60,
+                # Held open for at most the wait budget (1 to 60 s), so a small
+                # `job_timeout` does not hold the create for 60 s.
+                wait_seconds=max(1, min(60, int(self._job_timeout))),
                 parse_mode=self._parse_mode,
                 chunking={"strategy": self._chunking} if self._chunking else None,
                 output=self._output,
@@ -220,8 +238,9 @@ class NaceReader(BaseReader):
                     job.job_id, timeout=self._job_timeout, raise_on_failure=False
                 )
             if job.status != "succeeded":
-                detail = _clip(job.error_message or NO_ERROR_DETAIL, DETAIL_BUDGET)
-                message = f"NDI parse {job.status} for {file_name}: {detail}"
+                # A server message can echo a signed link; scrub it before it reaches logs.
+                detail = re.sub(r"https?://\S+", "<url>", job.error_message or NO_ERROR_DETAIL)
+                message = f"NDI parse {job.status} for {file_name}: {_clip(detail, DETAIL_BUDGET)}"
                 raise NaceError(message)
             return self._documents(job, file_name, url, extra_info)
         except nace_sdk.NaceError as error:
@@ -240,14 +259,16 @@ class NaceReader(BaseReader):
     def _upload(
         self, path: str | os.PathLike[str], fs: AbstractFileSystem | None
     ) -> tuple[UploadedFile, str]:
-        """Upload a local path (or its bytes, from `fs`) and return the file and its name."""
+        """Upload a local path (or its open handle, from `fs`) and return the file and its name."""
         file_name = Path(os.fspath(path)).name
+        # A unique workspace path, so Nace never answers with an existing file of the same
+        # name — the reader could then delete the caller's own file.
+        target = f"llama-index-readers-nace/{uuid.uuid4().hex}/{file_name}"
         if fs is None:
-            uploaded = self._sdk.documents.upload(path)
+            uploaded = self._sdk.documents.upload(path, path=target)
         else:
             with fs.open(str(path), "rb") as handle:
-                data = handle.read()
-            uploaded = self._sdk.documents.upload(data, file_name=file_name)
+                uploaded = self._sdk.documents.upload(handle, file_name=file_name, path=target)
         return uploaded, file_name
 
     def _documents(
@@ -265,15 +286,17 @@ class NaceReader(BaseReader):
         if not isinstance(document, dict):
             raise NaceAPIResponseValidationError(UNREADABLE_RESULT)
         disclosures = result.get("disclosures")
-        truncated = (
-            [
-                entry
-                for entry in disclosures
-                if isinstance(entry, dict) and entry.get("code") == "content_truncated"
-            ]
-            if isinstance(disclosures, list)
-            else []
-        )
+        truncated: list[dict[str, Any]] = []
+        if disclosures is not None:
+            # Fail closed on an unexpected shape: reading a malformed disclosures value as
+            # "not truncated" could return partial content.
+            if not isinstance(disclosures, list):
+                raise NaceAPIResponseValidationError(UNREADABLE_RESULT)
+            for entry in disclosures:
+                if not isinstance(entry, dict):
+                    raise NaceAPIResponseValidationError(UNREADABLE_RESULT)
+                if entry.get("code") == "content_truncated":
+                    truncated.append(entry)
         if any(entry.get("target") != "document_content" for entry in truncated):
             raise NaceError(f"NDI parse succeeded for {file_name}, but {TOO_LARGE}.")
         chunks = document.get("chunks")
@@ -304,7 +327,7 @@ class NaceReader(BaseReader):
         with tempfile.TemporaryDirectory() as folder:
             target = Path(folder) / DOWNLOAD_NAME
             self._sdk.jobs.download(job.job_id, content_url, target)
-            return target.read_text(encoding="utf-8")
+            return target.read_bytes().decode("utf-8")
 
     def _metadata(
         self, file_name: str, url: str | None, extra_info: dict[str, Any] | None
@@ -318,16 +341,24 @@ class NaceReader(BaseReader):
         return metadata
 
     def _cleanup(self, job: DocumentJob | None, uploaded: UploadedFile | None) -> None:
-        """Delete the job and the uploaded file; a failed deletion is a warning, never raised."""
+        """Delete the job and the uploaded file; a failed deletion is a warning, never raised.
+
+        Each deletion is guarded on its own, so a job deletion that raises anything (an SDK
+        error, a crash in the SDK's plumbing) neither skips the file deletion nor replaces
+        the first error.
+        """
         if job is not None:
             try:
                 self._sdk.jobs.delete(job.job_id)
-            except nace_sdk.NaceError as error:
+            except Exception as error:
                 logger.warning("could not delete NDI job %s: %s", job.job_id, type(error).__name__)
         if uploaded is not None:
             try:
-                self._sdk.documents.delete_file(uploaded.workspace_id, uploaded.file_id)
-            except nace_sdk.NaceError as error:
+                deletion = self._sdk.documents.delete_file(uploaded.workspace_id, uploaded.file_id)
+            except Exception as error:
                 logger.warning(
                     "could not delete NDI file %s: %s", uploaded.file_id, type(error).__name__
                 )
+            else:
+                if deletion.status != "deleted":
+                    logger.warning("deletion of NDI file %s is still running", uploaded.file_id)

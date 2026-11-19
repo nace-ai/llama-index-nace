@@ -116,9 +116,10 @@ See the [changelog](https://github.com/nace-ai/llama-index-nace/blob/main/CHANGE
 
 When Drex ships a new default model, update the packages' default by hand:
 
-1. Set `DEFAULT_MODEL` in both `_drex/client.py` copies
-   (`packages/llama-index-selectors-nace/llama_index/selectors/nace/_drex/client.py` and
-   `packages/llama-index-evaluation-nace/llama_index/evaluation/nace/_drex/client.py`).
+1. Set `DEFAULT_MODEL` in all three `_drex/client.py` copies
+   (`packages/llama-index-selectors-nace/llama_index/selectors/nace/_drex/client.py`,
+   `packages/llama-index-evaluation-nace/llama_index/evaluation/nace/_drex/client.py` and
+   `packages/llama-index-readers-nace/llama_index/readers/nace/_drex/client.py`).
    `scripts/check_drex_sync.py` (run in CI) fails unless the copies are identical.
 2. In the same file, check the pinned facts for the new model: `TEXT_ONLY_MODELS`,
    `MAX_IMAGES`, `IMAGE_MODEL`, and `OPENROUTER_DEFAULT_MODEL` (move it once OpenRouter

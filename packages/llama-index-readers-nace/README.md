@@ -52,7 +52,7 @@ Inputs are local paths, `https://` URLs, or sequences of either. Pass `fs=` to r
 
 ## What happens to your file
 
-A local file is uploaded to your Nace account and parsed as a job. For an `https://` URL, nothing is uploaded: Nace downloads the link. After the parse, on success and on failure, the reader deletes the job and the uploaded file before it returns the documents. If a deletion fails, the reader logs a warning with the id. When a result is larger than 1 MiB, the reader downloads the full Markdown before it deletes the job. See *Data retention* in the [Nace docs](https://console.nace.ai/docs) for what Nace keeps after a deletion.
+A local file is uploaded to your Nace account and parsed as a job. The upload goes to a unique path under `llama-index-readers-nace/` in the account, so an existing file with the same name is never touched. For an `https://` URL, nothing is uploaded: Nace downloads the link. After the parse, on success and on failure, the reader deletes the job and the uploaded file before it returns the documents. If a deletion fails, the reader logs a warning with the id. When the Markdown of a document is larger than 1 MiB, the reader downloads the full text before it deletes the job. A result that NDI cannot return complete (for example a very large workbook) raises an error; partial text is never returned. See *Data retention* in the [Nace docs](https://console.nace.ai/docs) for what Nace keeps after a deletion.
 
 Parse output is untrusted data: it can repeat instructions that are written in the document. Keep it separate from your agent's instructions.
 
@@ -63,5 +63,7 @@ Parse output is untrusted data: it can repeat instructions that are written in t
 - Accounts with Zero retention cannot upload local files (the API answers 422); pass a URL instead.
 - This is a reader, not a retriever: NDI has no endpoint that returns ranked passages with scores.
 - The metadata `url` of a URL source has no userinfo, query or fragment, because a signed link can hold a token.
+- With `chunking_strategy` set, a file for which NDI returns no chunks comes back as one `Document` with the whole text.
+- If a request fails after Nace accepted a job or a large multi-part upload (for example a 503 `job_pending`), the reader has no id to delete; look for leftovers under `llama-index-readers-nace/` and in the job list.
 
 Call `close()` to release the HTTP connections a reader opened; an `http_client` you passed in stays open.

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import os
 import re
 import tempfile
@@ -100,8 +101,9 @@ class NaceReader(BaseReader):
         parse_options: Extra Parse options passed to NDI (for example `output`); `formats`
             is always `["markdown"]`, and `source`, `parse_mode`, `chunking`, `wait_seconds`
             and the SDK transport arguments are refused here.
-        job_timeout: Seconds to wait for a parse job. The parse create is held open for at
-            most this many seconds, between 1 and 60; a longer wait polls instead.
+        job_timeout: Seconds to wait for a parse job that is not finished when the create
+            request returns. The create itself is held open for the same number of
+            seconds, between 1 and 60. A finite number above 0.
         timeout: HTTP timeout in seconds; at least 60, because a parse create is held open.
         max_retries: HTTP retries per SDK call.
         http_client: An `httpx.Client` to send the requests on. It stays the caller's:
@@ -139,8 +141,8 @@ class NaceReader(BaseReader):
                 f"(got {chunking_strategy!r})."
             )
             raise ValueError(message)
-        if job_timeout <= 0:
-            message = f"job_timeout must be above 0 seconds (got {job_timeout!r})."
+        if not (math.isfinite(job_timeout) and job_timeout > 0):
+            message = f"job_timeout must be a finite number above 0 seconds (got {job_timeout!r})."
             raise ValueError(message)
         options = dict(parse_options or {})
         reserved = RESERVED_PARSE_OPTIONS & options.keys()
@@ -239,7 +241,12 @@ class NaceReader(BaseReader):
                 )
             if job.status != "succeeded":
                 # A server message can echo a signed link; scrub it before it reaches logs.
-                detail = re.sub(r"https?://\S+", "<url>", job.error_message or NO_ERROR_DETAIL)
+                detail = re.sub(
+                    r"https?://\S+",
+                    "<url>",
+                    job.error_message or NO_ERROR_DETAIL,
+                    flags=re.IGNORECASE,
+                )
                 message = f"NDI parse {job.status} for {file_name}: {_clip(detail, DETAIL_BUDGET)}"
                 raise NaceError(message)
             return self._documents(job, file_name, url, extra_info)

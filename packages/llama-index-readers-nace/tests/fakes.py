@@ -19,7 +19,8 @@ CONTENT_URL = f"https://files.test/v1/documents/jobs/{JOB_ID}/document-content/m
 
 MARKDOWN = "# Test document\n\nMade-up Markdown for offline tests."
 #: What `GET <content_url>` returns: the full text of a result that was too large to inline.
-FULL_MARKDOWN = "# Test document\n\n" + "The full text that was too large to inline. " * 600
+# `\r\n` on purpose: the reader must return the downloaded bytes without newline translation.
+FULL_MARKDOWN = "# Test document\r\n\r\n" + "The full text that was too large to inline. " * 600
 PAGE_CHUNKS = [
     {
         "id": "chk_1",

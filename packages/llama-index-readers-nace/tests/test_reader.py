@@ -37,6 +37,7 @@ MakeReader = Callable[..., NaceReader]
 
 BAD_INPUTS = [
     ({"parse_mode": "turbo"}, URL, "parse_mode must be one of"),
+    ({"job_timeout": float("inf")}, URL, "finite number above 0"),
     ({"chunking_strategy": "chapter"}, URL, "chunking_strategy must be one of"),
     ({"parse_options": {"chunking": {"strategy": "page"}}}, URL, "parse_options must not contain"),
     (
@@ -66,6 +67,10 @@ UNREADABLE_RESULTS: list[Any] = [
             "page_count": 1,
         },
         "disclosures": {"code": "content_truncated"},
+    },
+    {
+        "document": {"markdown": MARKDOWN, "chunks": [], "page_count": 1},
+        "disclosures": ["content_truncated"],
     },
 ]
 #: Every upload goes to `llama-index-readers-nace/<32 hex digits>/<file name>`.
@@ -119,8 +124,9 @@ def test_page_chunking_returns_one_document_per_chunk(
 
 def test_queued_job_is_waited_for(make_reader: MakeReader, ndi: FakeNdi) -> None:
     ndi.replies["parse"] = [(202, {}, job_body(status="queued"))]
-    documents = make_reader().load_data(URL)
+    documents = make_reader(job_timeout=5).load_data(URL)
     assert [document.text for document in documents] == [MARKDOWN]
+    assert ndi.requests[0].url.params["wait_seconds"] == "5"  # held for the budget, not 60 s
     assert ndi.routes == ["parse", "get", "delete-job"]
 
 
@@ -136,7 +142,7 @@ def test_failed_job_raises_and_cleans_up(
                 error={
                     "code": "unreadable_file",
                     "message": "could not fetch "
-                    "https://example.test/files/report.pdf?token=made-up-token for parsing",
+                    "Https://example.test/files/report.pdf?token=made-up-token for parsing",
                 },
             ),
         )

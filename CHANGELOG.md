@@ -9,6 +9,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [readers 0.1.0] - 2026-11-20
+
 ### Added
 
 - `llama-index-readers-nace` 0.1.0: `NaceReader`, a LlamaIndex reader that parses files into

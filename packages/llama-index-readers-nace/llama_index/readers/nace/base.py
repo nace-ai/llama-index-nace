@@ -7,6 +7,8 @@ import math
 import os
 import re
 import tempfile
+import threading
+import time
 import uuid
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
@@ -24,6 +26,7 @@ from ._drex.errors import (
     NaceAPIResponseValidationError,
     NaceError,
     _clip,
+    _redact_text,
     convert_error,
 )
 from ._drex.origins import is_openrouter_host, resolve_destination
@@ -67,6 +70,43 @@ TOO_LARGE = (
 NO_ERROR_DETAIL = "no error detail"
 DETAIL_BUDGET = 300
 DOWNLOAD_NAME = "document.md"
+#: SDK 0.9.0 gives a held job read (`wait_seconds` above 0) an HTTP read timeout of at least
+#: this many seconds, whatever the caller passes, so a hold is only asked for while that much
+#: of the job budget is left; a smaller budget polls with plain reads instead.
+HELD_READ_SECONDS = 95.0
+MAX_HOLD_SECONDS = 25
+INITIAL_POLL_SECONDS = 1.0
+MAX_POLL_SECONDS = 10.0
+#: A job-file read is never given longer than this, however much budget is left: the SDK's own
+#: held reads use the same floor, and a stalled answer ends here instead of after the whole
+#: (default 600 s) budget.
+DOWNLOAD_READ_SECONDS = 95.0
+DOWNLOAD_THREAD_NAME = "llama-index-readers-nace-download"
+#: The whole job-and-file cleanup gets this many seconds; a deletion that would wait longer
+#: (a long `Retry-After` header) is refused and warned about instead.
+CLEANUP_SECONDS = 10.0
+
+#: Thread-local read cap for the reader's download thread, set by `NaceReader._downloaded_text`.
+_download_reads = threading.local()
+
+
+def _cap_download_reads(request: httpx.Request) -> None:
+    """Request hook: bound the reads of this thread's job-file downloads.
+
+    `jobs.download` streams with no read timeout (SDK 0.9.0 sends `read=None`), so a stalled
+    transfer would never end and neither would its thread. The reader's download thread caps
+    its own reads here — every other thread, the reader's own polls included, is untouched,
+    also on a caller-supplied `http_client` — and httpcore then ends a stalled read, so the
+    transfer fails, the SDK's retry count runs out, and the thread finishes instead of
+    holding its connection forever.
+    """
+    cap = getattr(_download_reads, "cap", None)
+    if cap is None:
+        return
+    timeouts = request.extensions.get("timeout")
+    if isinstance(timeouts, dict):
+        read = timeouts.get("read")
+        request.extensions["timeout"] = {**timeouts, "read": min(cap, read) if read else cap}
 
 
 class _NdiClient(DrexClient):
@@ -103,7 +143,12 @@ class NaceReader(BaseReader):
             and the SDK transport arguments are refused here.
         job_timeout: Seconds to wait for a parse job that is not finished when the create
             request returns. The create itself is held open for that time in whole
-            seconds (rounded down), between 1 and 60. A finite number above 0.
+            seconds (rounded down), between 1 and 60. A finite number above 0. The same
+            budget bounds everything after the create: every poll's HTTP timeout (capped at
+            95 s) and retry (a `Retry-After` header included), and the download of the full
+            text of a truncated result. A result that only arrives after the budget is
+            refused, and the job is deleted. The bound is best-effort: a request already in
+            flight, an SDK retry or the cleanup can run slightly past the deadline.
         timeout: HTTP timeout in seconds; at least 60, because a parse create is held open.
         max_retries: HTTP retries per SDK call.
         http_client: An `httpx.Client` to send the requests on. It stays the caller's:
@@ -159,6 +204,7 @@ class NaceReader(BaseReader):
         self._parse_mode = parse_mode
         self._chunking = chunking_strategy
         self._job_timeout = job_timeout
+        self._max_retries = max_retries
         self._output = dict(options.pop("output", None) or {})
         self._output["formats"] = ["markdown"]
         self._options = options
@@ -171,6 +217,11 @@ class NaceReader(BaseReader):
             openrouter=False,
             http_client=http_client,
         )
+        # Cap the reads of the download thread with a request hook on the sync httpx client
+        # (a supplied one too: the hook is idempotent and thread-local, like the `_drex`
+        # guard hook the client also installs there).
+        if _cap_download_reads not in self._client._sync_http.event_hooks["request"]:
+            self._client._sync_http.event_hooks["request"].append(_cap_download_reads)
 
     @property
     def _sdk(self) -> nace_sdk.NaceClient:
@@ -236,25 +287,75 @@ class NaceReader(BaseReader):
                 output=self._output,
                 **self._options,
             )
+            # One budget for everything after the create returns: waiting for the job and,
+            # for a truncated result, downloading the full text.
+            deadline = time.monotonic() + self._job_timeout
             if not job.is_terminal:
-                job = self._sdk.jobs.wait(
-                    job.job_id, timeout=self._job_timeout, raise_on_failure=False
-                )
+                job = self._await_job(job, file_name, deadline)
             if job.status != "succeeded":
-                # A server message can echo a signed link; scrub it before it reaches logs.
+                # A server message can echo a signed link or the configured key; scrub both
+                # before they reach logs.
                 detail = re.sub(
                     r"https?://\S+",
                     "<url>",
                     job.error_message or NO_ERROR_DETAIL,
                     flags=re.IGNORECASE,
                 )
+                detail = _redact_text(detail, self._client._secrets)
                 message = f"NDI parse {job.status} for {file_name}: {_clip(detail, DETAIL_BUDGET)}"
                 raise NaceError(message)
-            return self._documents(job, file_name, url, extra_info)
+            return self._documents(job, file_name, url, extra_info, deadline)
         except nace_sdk.NaceError as error:
-            raise convert_error(error) from _cause(error)
+            raise convert_error(error, secrets=self._client._secrets) from _cause(error)
         finally:
             self._cleanup(job, uploaded)
+
+    def _await_job(self, job: DocumentJob, file_name: str, deadline: float) -> DocumentJob:
+        """Read the job until it is terminal, within `deadline`.
+
+        `jobs.wait` is not used: its held reads carry a 95-second HTTP timeout, it retries
+        under the client's unbounded policy (an hour-long `Retry-After` is slept), and it
+        returns a job that only finished after its own deadline. Here every read's HTTP
+        timeout and retry budget is the time the budget has left, and a read that only
+        finishes after the deadline is not accepted, so the wait cannot outlast `job_timeout`.
+        """
+        interval = INITIAL_POLL_SECONDS
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise self._job_budget_error(job, file_name)
+            # A held read's HTTP timeout is at least `HELD_READ_SECONDS` whatever is passed,
+            # so one is asked for only while that much budget is left; a smaller budget polls
+            # with plain reads, each bounded by the time it has left.
+            hold = MAX_HOLD_SECONDS if remaining >= HELD_READ_SECONDS else 0
+            began = time.monotonic()
+            job = self._sdk.jobs.get(
+                job.job_id,
+                wait_seconds=hold,
+                # The SDK raises a held read's timeout to at least 95 s whatever is passed,
+                # so pass exactly that; a plain read takes the time left (under 95 s). A
+                # poll's read timeout is thus never the whole remaining budget (600 s by
+                # default), and a stalled answer ends at 95 s at the latest.
+                timeout=HELD_READ_SECONDS if hold else remaining,
+                retry=nace_sdk.RetryPolicy(max_retries=self._max_retries, timeout=remaining),
+            )
+            if job.is_terminal:
+                if time.monotonic() > deadline:
+                    raise self._job_budget_error(job, file_name)
+                return job
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise self._job_budget_error(job, file_name)
+            # A held read already waited out its hold server-side; only make up the rest.
+            time.sleep(max(0.0, min(interval, remaining) - (time.monotonic() - began)))
+            interval = min(interval * 2, MAX_POLL_SECONDS)
+
+    def _job_budget_error(self, job: DocumentJob, file_name: str) -> NaceError:
+        """The error for a job that did not come back within its budget."""
+        return NaceError(
+            f"NDI parse for {file_name}: job {job.job_id} did not come back within "
+            f"{self._job_timeout:g}s (its last status was {job.status})"
+        )
 
     def _url_source(self, url: str) -> tuple[dict[str, Any], str, str]:
         """The parse source, the file name and the metadata URL of an `https://` source."""
@@ -285,6 +386,7 @@ class NaceReader(BaseReader):
         file_name: str,
         url: str | None,
         extra_info: dict[str, Any] | None,
+        deadline: float,
     ) -> list[Document]:
         """The `Document` objects of a succeeded parse job."""
         result = job.result
@@ -308,14 +410,20 @@ class NaceReader(BaseReader):
         if any(entry.get("target") != "document_content" for entry in truncated):
             raise NaceError(f"NDI parse succeeded for {file_name}, but {TOO_LARGE}.")
         chunks = document.get("chunks")
-        if self._chunking and isinstance(chunks, list) and chunks:
-            metadata = self._metadata(file_name, url, extra_info)
-            return [self._chunk_document(chunk, dict(metadata)) for chunk in chunks]
+        if self._chunking:
+            # Fail closed on a malformed chunks value: reading it as "no chunks" would
+            # silently change the output from one document per chunk to one unlabelled
+            # document with the whole text.
+            if chunks is not None and not isinstance(chunks, list):
+                raise NaceAPIResponseValidationError(UNREADABLE_RESULT)
+            if chunks:
+                metadata = self._metadata(file_name, url, extra_info)
+                return [self._chunk_document(chunk, dict(metadata)) for chunk in chunks]
         markdown = document.get("markdown")
         if not isinstance(markdown, str):
             raise NaceAPIResponseValidationError(UNREADABLE_RESULT)
         if truncated:
-            markdown = self._downloaded_text(job, document, file_name)
+            markdown = self._downloaded_text(job, document, file_name, deadline)
         return [Document(text=markdown, metadata=self._metadata(file_name, url, extra_info))]
 
     def _chunk_document(self, chunk: Any, metadata: dict[str, Any]) -> Document:
@@ -327,15 +435,53 @@ class NaceReader(BaseReader):
             metadata["page_label"] = str(location["page"])
         return Document(text=chunk["content"], metadata=metadata)
 
-    def _downloaded_text(self, job: DocumentJob, document: dict[str, Any], file_name: str) -> str:
-        """The full Markdown of a truncated result, downloaded before any cleanup."""
+    def _downloaded_text(
+        self, job: DocumentJob, document: dict[str, Any], file_name: str, deadline: float
+    ) -> str:
+        """The full Markdown of a truncated result, downloaded before any cleanup.
+
+        The SDK streams a download with no read timeout, so it runs on a daemon thread whose
+        reads are capped (see `_cap_download_reads`): a stalled transfer ends on its own
+        instead of lingering forever, and the caller is given only the time the job budget
+        has left. A transfer that outlives the budget is left to finish or fail on its own;
+        the connection it holds is released when it ends.
+        """
         content_url = document.get("content_url")
         if not isinstance(content_url, str):
             raise NaceError(f"NDI parse succeeded for {file_name}, but {TOO_LARGE}.")
-        with tempfile.TemporaryDirectory() as folder:
-            target = Path(folder) / DOWNLOAD_NAME
-            self._sdk.jobs.download(job.job_id, content_url, target)
-            return target.read_bytes().decode("utf-8")
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise self._download_budget_error(job, file_name)
+        outcome: dict[str, Any] = {}
+
+        def download() -> None:
+            # Bound this thread's reads (the request hook above), so a stall ends it.
+            _download_reads.cap = min(remaining, DOWNLOAD_READ_SECONDS)
+            try:
+                with tempfile.TemporaryDirectory() as folder:
+                    target = Path(folder) / DOWNLOAD_NAME
+                    self._sdk.jobs.download(job.job_id, content_url, target, wait_timeout=remaining)
+                    outcome["text"] = target.read_bytes().decode("utf-8")
+            except Exception as error:  # the thread must never take the process down
+                outcome["error"] = error
+            finally:
+                _download_reads.cap = None
+
+        thread = threading.Thread(target=download, daemon=True, name=DOWNLOAD_THREAD_NAME)
+        thread.start()
+        thread.join(remaining)
+        if thread.is_alive():
+            raise self._download_budget_error(job, file_name)
+        if "error" in outcome:
+            raise outcome["error"]
+        return str(outcome["text"])
+
+    def _download_budget_error(self, job: DocumentJob, file_name: str) -> NaceError:
+        """The error for a full-text download that did not finish within the job budget."""
+        return NaceError(
+            f"NDI parse for {file_name}: the full text of job {job.job_id} "
+            f"did not download within {self._job_timeout:g}s"
+        )
 
     def _metadata(
         self, file_name: str, url: str | None, extra_info: dict[str, Any] | None
@@ -349,20 +495,33 @@ class NaceReader(BaseReader):
         return metadata
 
     def _cleanup(self, job: DocumentJob | None, uploaded: UploadedFile | None) -> None:
-        """Delete the job and the uploaded file; a failed deletion is a warning, never raised.
+        """Delete the job and the uploaded file within a short fixed budget.
 
-        Each deletion is guarded on its own, so a job deletion that raises anything (an SDK
-        error, a crash in the SDK's plumbing) neither skips the file deletion nor replaces
-        the first error.
+        A failed deletion is a warning, never raised. Each deletion's HTTP timeout and retry
+        budget — a long `Retry-After` header included — is the time that budget has left, so
+        cleanup never waits long however the server answers; `delete_file` is held up to 25 s
+        longer by the SDK, which waits for the erasure to be confirmed. Each deletion is
+        guarded on its own, so a job deletion that raises anything (an SDK error, a crash in
+        the SDK's plumbing) neither skips the file deletion nor replaces the first error.
         """
+        deadline = time.monotonic() + CLEANUP_SECONDS
         if job is not None:
             try:
-                self._sdk.jobs.delete(job.job_id)
+                self._sdk.jobs.delete(
+                    job.job_id,
+                    timeout=self._cleanup_left(deadline),
+                    retry=self._cleanup_retry(deadline),
+                )
             except Exception as error:
                 logger.warning("could not delete NDI job %s: %s", job.job_id, type(error).__name__)
         if uploaded is not None:
             try:
-                deletion = self._sdk.documents.delete_file(uploaded.workspace_id, uploaded.file_id)
+                deletion = self._sdk.documents.delete_file(
+                    uploaded.workspace_id,
+                    uploaded.file_id,
+                    timeout=self._cleanup_left(deadline),
+                    retry=self._cleanup_retry(deadline),
+                )
             except Exception as error:
                 logger.warning(
                     "could not delete NDI file %s: %s", uploaded.file_id, type(error).__name__
@@ -370,3 +529,16 @@ class NaceReader(BaseReader):
             else:
                 if deletion.status != "deleted":
                     logger.warning("deletion of NDI file %s is still running", uploaded.file_id)
+
+    def _cleanup_left(self, deadline: float) -> float:
+        """The cleanup budget's time left; a spent budget refuses the deletion (so: a warning)."""
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise NaceError(f"the {CLEANUP_SECONDS:g}s cleanup budget is spent")
+        return remaining
+
+    def _cleanup_retry(self, deadline: float) -> nace_sdk.RetryPolicy:
+        """A retry policy bounded by the cleanup budget, so a long `Retry-After` is refused."""
+        return nace_sdk.RetryPolicy(
+            max_retries=self._max_retries, timeout=self._cleanup_left(deadline)
+        )

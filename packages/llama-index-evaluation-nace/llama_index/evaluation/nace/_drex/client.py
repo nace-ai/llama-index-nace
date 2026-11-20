@@ -101,6 +101,9 @@ class DrexClient:
             message = "openrouter=True needs a base_url, such as https://openrouter.ai/api/v1."
             raise ValueError(message)
         resolved_key = resolve_api_key(api_key, destination, openrouter=self.openrouter)
+        # The credentials this client sends, so a server that echoes one back in an error can
+        # never have it stored or logged (see `convert_error`).
+        self._secrets: tuple[str, ...] = (resolved_key,)
 
         # `httpx.Headers` keeps repeated fields (a `dict` would comma-join repeated `Cookie` ones).
         headers = httpx.Headers(default_headers)
@@ -116,6 +119,9 @@ class DrexClient:
         # Owned clients never follow redirects; a supplied one may, and the hook below then
         # refuses any hop that leaves the first origin.
         sync_http = http_client or httpx.Client(timeout=timeout, follow_redirects=False)
+        # The sync httpx client under the SDK client, for callers that need to reach it (the
+        # reader installs its download-read cap hook on it).
+        self._sync_http = sync_http
         if guard_request not in sync_http.event_hooks["request"]:
             sync_http.event_hooks["request"].append(guard_request)
         async_http = http_async_client or httpx.AsyncClient(timeout=timeout, follow_redirects=False)
@@ -199,9 +205,9 @@ class DrexClient:
         try:
             result = self._client.system_one(**call)
         except nace_sdk.NaceError as error:
-            raise convert_error(error, openrouter=is_openrouter_host(self.base_url)) from _cause(
-                error
-            )
+            raise convert_error(
+                error, openrouter=is_openrouter_host(self.base_url), secrets=self._secrets
+            ) from _cause(error)
         return _response(result)
 
     async def aask(
@@ -216,9 +222,9 @@ class DrexClient:
         try:
             result = await self._aclient.system_one(**call)
         except nace_sdk.NaceError as error:
-            raise convert_error(error, openrouter=is_openrouter_host(self.base_url)) from _cause(
-                error
-            )
+            raise convert_error(
+                error, openrouter=is_openrouter_host(self.base_url), secrets=self._secrets
+            ) from _cause(error)
         return _response(result)
 
     def _prepare(

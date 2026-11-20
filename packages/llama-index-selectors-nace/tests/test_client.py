@@ -25,6 +25,7 @@ from llama_index.selectors.nace._drex.client import (
 from llama_index.selectors.nace._drex.errors import (
     NaceAPIConnectionError,
     NaceAPIResponseValidationError,
+    NaceAuthenticationError,
     NaceError,
     NaceImageError,
     NaceImageLimitError,
@@ -386,6 +387,14 @@ def test_connection_error_converted(make_client: MakeClient) -> None:
     )
     with pytest.raises(NaceAPIConnectionError):
         client.ask("t", {"q": QUESTIONS["noul"]})
+
+
+def test_ask_error_redacts_the_api_key(make_client: MakeClient, drex: FakeDrex) -> None:
+    drex.replies.append(error(401, "Invalid API key nace_sk_test rejected."))
+    with pytest.raises(NaceAuthenticationError) as info:
+        make_client().ask("t", {"q": QUESTIONS["noul"]})
+    assert "nace_sk_test" not in str(info.value)
+    assert "Invalid API key <redacted> rejected." in str(info.value)
 
 
 SECRET = "PATIENT-SSN-123"

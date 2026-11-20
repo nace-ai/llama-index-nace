@@ -179,3 +179,39 @@ def test_short_errors_unchanged():
     assert str(convert_error(sdk_error(422, body))) == (
         "Drex returned 422: invalid\n  model: unknown\n(request_id=req_1)"
     )
+
+
+def test_secrets_are_redacted_from_message_body_and_issues():
+    key = "nace_sk_test_secret"
+    body = {
+        "error": {
+            "type": "authentication_error",
+            "message": f"Invalid API key {key} provided.",
+            "issues": [{"path": "authorization", "message": f"the key {key} is invalid"}],
+        }
+    }
+    err = convert_error(sdk_error(401, body), secrets=(key,))
+    assert key not in str(err)
+    assert key not in repr(err)
+    assert "Invalid API key <redacted> provided." in str(err)
+    assert "authorization: the key <redacted> is invalid" in str(err)
+    assert err.body == {
+        "error": {
+            "type": "authentication_error",
+            "message": "Invalid API key <redacted> provided.",
+            "issues": [{"path": "authorization", "message": "the key <redacted> is invalid"}],
+        }
+    }
+    assert err.issues == [{"path": "authorization", "message": "the key <redacted> is invalid"}]
+
+
+def test_secrets_are_redacted_from_connection_and_plain_errors():
+    key = "nace_sk_test_secret"
+    converted = convert_error(
+        nace_sdk.NaceAPIConnectionError(f"Connection error: {key}"), secrets=(key,)
+    )
+    assert key not in str(converted)
+    assert "<redacted>" in str(converted)
+    assert str(convert_error(nace_sdk.NaceError(f"echo {key}"), secrets=(key,))) == (
+        "echo <redacted>"
+    )

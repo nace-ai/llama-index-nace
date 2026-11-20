@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import re
+import threading
+import time
+import types
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 import fsspec
+import httpx
 import pytest
 from fakes import (
     CONTENT_URL,
@@ -22,13 +26,16 @@ from fakes import (
     error,
     job_body,
     parse_result,
+    route_of,
 )
 from llama_index.core import SimpleDirectoryReader
 from llama_index.readers.nace import NaceReader
+from llama_index.readers.nace import base as nace_base
 from llama_index.readers.nace._drex.errors import (
     NaceAPIResponseValidationError,
     NaceAuthenticationError,
     NaceError,
+    NaceRateLimitError,
 )
 
 URL = "https://example.test/files/report.pdf"
@@ -59,6 +66,14 @@ UNREADABLE_RESULTS: list[Any] = [
             "page_count": 1,
         }
     },
+    {
+        "document": {
+            "markdown": MARKDOWN,
+            "chunks": {"id": "chk_1", "content": "an object, not a list"},
+            "page_count": 1,
+        }
+    },
+    {"document": {"markdown": MARKDOWN, "chunks": "not a list", "page_count": 1}},
     {
         "document": {
             "markdown": MARKDOWN,
@@ -127,7 +142,122 @@ def test_queued_job_is_waited_for(make_reader: MakeReader, ndi: FakeNdi) -> None
     documents = make_reader(job_timeout=5).load_data(URL)
     assert [document.text for document in documents] == [MARKDOWN]
     assert ndi.requests[0].url.params["wait_seconds"] == "5"  # held for the budget, not 60 s
+    # The poll's HTTP timeout is the time the budget has left, not the SDK's 95-second floor.
+    assert ndi.requests[1].extensions["timeout"]["read"] <= 5
     assert ndi.routes == ["parse", "get", "delete-job"]
+
+
+def test_default_first_poll_read_is_not_the_whole_budget(
+    make_reader: MakeReader, ndi: FakeNdi
+) -> None:
+    ndi.replies["parse"] = [(202, {}, job_body(status="queued"))]
+    documents = make_reader().load_data(URL)  # the default job_timeout is 600 s
+    assert [document.text for document in documents] == [MARKDOWN]
+    # The first poll is held, and its read timeout is the SDK's 95-second floor — not a
+    # ~600-second read that a stalled answer could hold open for the whole budget.
+    assert ndi.requests[1].url.params["wait_seconds"] == "25"
+    assert ndi.requests[1].extensions["timeout"]["read"] <= 95
+
+
+def test_poll_refuses_a_result_that_arrives_after_the_budget(
+    make_reader: MakeReader, ndi: FakeNdi, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ndi.replies["parse"] = [(202, {}, job_body(status="queued"))]
+    clock: dict[str, float] = {"now": 1000.0}
+    # A fake clock for the reader's wait loop: the poll answers only after 80 simulated seconds.
+    fake_time = types.SimpleNamespace(
+        monotonic=lambda: clock["now"],
+        sleep=lambda delay: clock.__setitem__("now", clock["now"] + delay),
+    )
+    monkeypatch.setattr(nace_base, "time", fake_time, raising=False)
+
+    def late_success(request: httpx.Request) -> httpx.Response:
+        if route_of(request) == "get":
+            clock["now"] += 80.0
+        return ndi(request)
+
+    reader = make_reader(
+        job_timeout=5, http_client=httpx.Client(transport=httpx.MockTransport(late_success))
+    )
+    with pytest.raises(NaceError, match="did not come back within 5s"):
+        reader.load_data(URL)
+    assert ndi.routes == ["parse", "get", "delete-job"]  # the late job is still cleaned up
+
+
+def test_poll_retry_waits_stay_within_the_job_budget(
+    make_reader: MakeReader, ndi: FakeNdi, sleeps: list[float]
+) -> None:
+    ndi.replies["parse"] = [(202, {}, job_body(status="queued"))]
+    ndi.replies["get"] = [
+        error(429, "slow down a little", headers={"retry-after-ms": "2000"}),
+        error(429, "slow down a lot", headers={"retry-after": "3600"}),
+    ]
+    with pytest.raises(NaceRateLimitError, match="Drex returned 429"):
+        make_reader(job_timeout=5).load_data(URL)
+    # The Retry-After that fits the budget is slept (a second attempt is made); the
+    # hour-long one is refused instead of being slept.
+    assert sleeps == [2.0]
+    assert ndi.routes == ["parse", "get", "get", "delete-job"]
+
+
+def test_stalled_full_text_download_is_bounded_by_the_job_budget(
+    make_reader: MakeReader, ndi: FakeNdi
+) -> None:
+    ndi.result = parse_result(
+        disclosures=[
+            {"code": "content_truncated", "target": "document_content", "detail": "over 1 MiB"}
+        ]
+    )
+    stalled = threading.Event()
+
+    def stall_download(request: httpx.Request) -> httpx.Response:
+        if route_of(request) == "download":
+            stalled.wait(30.0)  # a transfer that never delivers a byte
+        return ndi(request)
+
+    reader = make_reader(
+        job_timeout=1.0, http_client=httpx.Client(transport=httpx.MockTransport(stall_download))
+    )
+    began = time.monotonic()
+    with pytest.raises(NaceError, match="did not download within 1s"):
+        reader.load_data(URL)
+    assert time.monotonic() - began < 10.0  # bounded: the stall cannot hold load_data open
+    assert "delete-job" in ndi.routes  # cleanup is not blocked by the stalled transfer
+    stalled.set()  # release the leftover daemon thread; its late result is discarded
+
+
+def test_download_retry_wait_never_holds_the_caller_beyond_the_job_budget(
+    make_reader: MakeReader, ndi: FakeNdi
+) -> None:
+    ndi.result = parse_result(
+        disclosures=[
+            {"code": "content_truncated", "target": "document_content", "detail": "over 1 MiB"}
+        ]
+    )
+    ndi.replies["download"] = [error(429, "slow down", headers={"retry-after": "3600"})]
+    began = time.monotonic()
+    with pytest.raises(NaceError, match="did not download within 1s"):
+        make_reader(job_timeout=1.0).load_data(URL)
+    # The caller leaves within the budget although the SDK would sleep the hour the
+    # Retry-After header asks for; the sleep is left to the leftover daemon thread.
+    assert time.monotonic() - began < 10.0
+    assert "delete-job" in ndi.routes  # cleanup is not blocked by the pending retry
+
+
+def test_download_request_gets_a_finite_read_timeout(make_reader: MakeReader, ndi: FakeNdi) -> None:
+    ndi.result = parse_result(
+        disclosures=[
+            {"code": "content_truncated", "target": "document_content", "detail": "over 1 MiB"}
+        ]
+    )
+    documents = make_reader().load_data(URL)
+    assert documents[0].text == FULL_MARKDOWN
+    download = next(request for request in ndi.requests if route_of(request) == "download")
+    read = download.extensions["timeout"]["read"]
+    # SDK 0.9.0 streams a download with read=None: a stalled transfer would never end, and
+    # neither would its thread. The reader caps the download thread's reads, so a stall ends.
+    assert read is not None
+    assert read <= 95
 
 
 def test_failed_job_raises_and_cleans_up(
@@ -142,7 +272,8 @@ def test_failed_job_raises_and_cleans_up(
                 error={
                     "code": "unreadable_file",
                     "message": "could not fetch "
-                    "Https://example.test/files/report.pdf?token=made-up-token for parsing",
+                    "Https://example.test/files/report.pdf?token=made-up-token for parsing "
+                    "with the key nace_sk_test",
                 },
             ),
         )
@@ -156,6 +287,8 @@ def test_failed_job_raises_and_cleans_up(
     assert "<url>" in message
     assert "made-up-token" not in message
     assert "example.test/files" not in message
+    assert "nace_sk_test" not in message  # an echoed key is redacted like a signed link
+    assert "<redacted>" in message
     assert ndi.routes == ["grant", "upload", "parse", "delete-job", "delete-file"]
 
 
@@ -186,6 +319,45 @@ def test_authentication_error_leaks_nothing(
     assert "raw-body-marker" not in message
     # The file was still cleaned up; no job exists to delete.
     assert "delete-file" in ndi.routes
+
+
+def test_an_echoed_api_key_never_reaches_the_error(
+    make_reader: MakeReader, ndi: FakeNdi, tmp_path: Path
+) -> None:
+    ndi.replies["parse"] = [
+        (
+            401,
+            {},
+            {
+                "error": {
+                    "type": "authentication_error",
+                    "message": "Invalid API key nace_sk_echoed rejected.",
+                    "issues": [
+                        {"path": "authorization", "message": "the key nace_sk_echoed is invalid"}
+                    ],
+                },
+                "request_id": "req_err",
+            },
+        )
+    ]
+    source = tmp_path / "report.pdf"
+    source.write_bytes(b"made-up pdf bytes")
+    with pytest.raises(NaceAuthenticationError) as raised:
+        make_reader(api_key="nace_sk_echoed").load_data(source)
+    echoed = raised.value
+    assert "nace_sk_echoed" not in str(echoed)
+    assert "nace_sk_echoed" not in repr(echoed)
+    assert "Invalid API key <redacted> rejected." in str(echoed)
+    assert "authorization: the key <redacted> is invalid" in str(echoed)
+    assert echoed.body == {
+        "error": {
+            "type": "authentication_error",
+            "message": "Invalid API key <redacted> rejected.",
+            "issues": [{"path": "authorization", "message": "the key <redacted> is invalid"}],
+        },
+        "request_id": "req_err",
+    }
+    assert "delete-file" in ndi.routes  # the upload is still cleaned up
 
 
 def test_truncated_result_downloads_full_text_or_fails_closed(
@@ -260,6 +432,57 @@ def test_cleanup_failure_warns_and_still_returns_documents(
     assert f"deletion of NDI file {FILE_ID} is still running" in warnings
 
 
+def test_cleanup_does_not_honor_long_retry_after(
+    make_reader: MakeReader,
+    ndi: FakeNdi,
+    tmp_path: Path,
+    sleeps: list[float],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    throttled = [error(429, "slow down", headers={"retry-after": "3600"})] * 3
+    ndi.replies["delete-job"] = throttled
+    ndi.replies["delete-file"] = throttled
+    source = tmp_path / "report.pdf"
+    source.write_bytes(b"made-up pdf bytes")
+    with caplog.at_level("WARNING"):
+        documents = make_reader().load_data(source)
+    # The documents still come back, and no hour-long cleanup sleep is ever scheduled.
+    assert [document.text for document in documents] == [MARKDOWN]
+    assert sleeps == []
+    delete_job = next(request for request in ndi.requests if route_of(request) == "delete-job")
+    assert delete_job.extensions["timeout"]["read"] <= 10  # a stalled deletion ends with the budget
+    warnings = [record.getMessage() for record in caplog.records if record.levelname == "WARNING"]
+    assert any(JOB_ID in text and "NaceRateLimitError" in text for text in warnings)
+    assert any(FILE_ID in text and "NaceRateLimitError" in text for text in warnings)
+
+
+def test_cleanup_budget_spent_skips_the_rest_with_a_warning(
+    make_reader: MakeReader,
+    ndi: FakeNdi,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(nace_base, "CLEANUP_SECONDS", 0.2, raising=False)
+
+    def slow_delete_job(request: httpx.Request) -> httpx.Response:
+        if route_of(request) == "delete-job":
+            time.sleep(0.3)  # longer than the whole cleanup budget
+        return ndi(request)
+
+    source = tmp_path / "report.pdf"
+    source.write_bytes(b"made-up pdf bytes")
+    reader = make_reader(http_client=httpx.Client(transport=httpx.MockTransport(slow_delete_job)))
+    with caplog.at_level("WARNING"):
+        documents = reader.load_data(source)
+    assert [document.text for document in documents] == [MARKDOWN]
+    # The job deletion used up the budget, so the file deletion is skipped with a warning
+    # instead of waiting past it.
+    warnings = [record.getMessage() for record in caplog.records if record.levelname == "WARNING"]
+    assert any(FILE_ID in text and "NaceError" in text for text in warnings)
+    assert not any(JOB_ID in text for text in warnings)  # the job deletion itself succeeded
+
+
 def test_job_deletion_crash_still_deletes_the_file(
     make_reader: MakeReader,
     ndi: FakeNdi,
@@ -271,7 +494,7 @@ def test_job_deletion_crash_still_deletes_the_file(
     source.write_bytes(b"made-up pdf bytes")
     reader = make_reader()
 
-    def crash(job_id: object) -> None:
+    def crash(job_id: object, **kwargs: object) -> None:
         raise RuntimeError("made-up crash")
 
     monkeypatch.setattr(reader._sdk.jobs, "delete", crash)

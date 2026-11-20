@@ -5,6 +5,7 @@ Messages never include the request or response body, so state cannot leak into l
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 import httpx
@@ -50,18 +51,25 @@ class NaceAPIError(NaceError):
     """Drex answered with an unsuccessful HTTP status.
 
     `body` and `headers` hold the raw response and must not be logged; `str` and `repr` never
-    include them.
+    include them. A server that echoes the configured API key back has it redacted from the
+    message, `issues` and `body` when the key is passed in `secrets`.
     """
 
-    def __init__(self, error: nace_sdk.NaceAPIError, message: str | None = None) -> None:
+    def __init__(
+        self,
+        error: nace_sdk.NaceAPIError,
+        message: str | None = None,
+        *,
+        secrets: Sequence[str] = (),
+    ) -> None:
         """Wrap an SDK error, keeping its status, request id and issues."""
-        super().__init__(message or _message(error))
+        super().__init__(message or _message(error, secrets=secrets))
         self.status: int = error.status
         self.request_id: str | None = error.request_id
         self.type: str | None = error.type
-        self.issues: list[dict[str, str]] = error.issues
+        self.issues: list[dict[str, str]] = _redact(error.issues, secrets)
         self.headers: httpx.Headers = error.headers
-        self.body: Any = error.body
+        self.body: Any = _redact(error.body, secrets)
 
     @property
     def status_code(self) -> int:
@@ -165,6 +173,33 @@ def _safe_detail(error: nace_sdk.NaceAPIError) -> str | None:
 
 MAX_MESSAGE_CHARS = 500
 
+_REDACTED = "<redacted>"
+
+
+def _redact_text(text: str, secrets: Sequence[str]) -> str:
+    """Replace every secret in `text` with `<redacted>`.
+
+    A server that echoes a configured key back must never have it reach a message, a stored
+    body or a log.
+    """
+    for secret in secrets:
+        if secret:
+            text = text.replace(secret, _REDACTED)
+    return text
+
+
+def _redact(value: Any, secrets: Sequence[str]) -> Any:
+    """`value` with secrets scrubbed from strings, and from lists and dicts recursively."""
+    if not secrets:
+        return value
+    if isinstance(value, str):
+        return _redact_text(value, secrets)
+    if isinstance(value, list):
+        return [_redact(item, secrets) for item in value]
+    if isinstance(value, dict):
+        return {name: _redact(item, secrets) for name, item in value.items()}
+    return value
+
 
 def _clip(text: str, budget: int) -> str:
     """Cut `text` to at most `budget` characters, ending in an ellipsis when it was cut."""
@@ -173,11 +208,17 @@ def _clip(text: str, budget: int) -> str:
     return text[: max(0, budget - 1)] + "…"
 
 
-def _message(error: nace_sdk.NaceAPIError, openrouter: bool = False) -> str:
+def _message(
+    error: nace_sdk.NaceAPIError, openrouter: bool = False, *, secrets: Sequence[str] = ()
+) -> str:
     detail = _safe_detail(error)
+    if detail is not None:
+        detail = _redact_text(detail, secrets)
     text = f"Drex returned {error.status}" + (f": {detail}" if detail else "")
     lines = [
-        f"{i.get('path') or '(request)'}: {i['message']}" for i in error.issues if i.get("message")
+        _redact_text(f"{i.get('path') or '(request)'}: {i['message']}", secrets)
+        for i in error.issues
+        if i.get("message")
     ]
     # Drex's top-level message often repeats a single issue; don't print it twice.
     if lines and lines != [detail] and [i.get("message") for i in error.issues] != [detail]:
@@ -196,15 +237,19 @@ def _message(error: nace_sdk.NaceAPIError, openrouter: bool = False) -> str:
     return _clip(text, MAX_MESSAGE_CHARS - len(guidance)) + guidance
 
 
-def convert_error(error: Exception, *, openrouter: bool = False) -> Exception:
+def convert_error(
+    error: Exception, *, openrouter: bool = False, secrets: Sequence[str] = ()
+) -> Exception:
     """Map an `nace_sdk` error to this package's error classes.
 
     `openrouter` makes a 402 point to OpenRouter's credits page instead of Nace billing.
+    `secrets` (the configured API key) is redacted from every message, and from the `issues`
+    and `body` an `NaceAPIError` keeps.
     """
     if isinstance(error, nace_sdk.NaceAPITimeoutError):
         return NaceAPITimeoutError(str(error))
     if isinstance(error, nace_sdk.NaceAPIConnectionError):
-        return NaceAPIConnectionError(str(error))
+        return NaceAPIConnectionError(_redact_text(str(error), secrets))
     if isinstance(error, nace_sdk.NaceAPIResponseValidationError):
         # The SDK's text names the response's answer and field; send a fixed message instead.
         return NaceAPIResponseValidationError(_INVALID_RESPONSE)
@@ -212,11 +257,11 @@ def convert_error(error: Exception, *, openrouter: bool = False) -> Exception:
         cls = _BY_STATUS.get(error.status)
         if cls is None:
             cls = NaceInternalServerError if error.status >= 500 else NaceAPIError
-        return cls(error, _message(error, openrouter))
+        return cls(error, _message(error, openrouter, secrets=secrets), secrets=secrets)
     if isinstance(error, nace_sdk.NaceError) and str(error).startswith(REDIRECT_MESSAGE):
         return NaceRedirectError(_REDIRECT_DETAIL)
     if isinstance(error, nace_sdk.NaceError):
-        return NaceError(str(error))
+        return NaceError(_redact_text(str(error), secrets))
     return error
 
 

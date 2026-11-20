@@ -1,12 +1,37 @@
 # Changelog
 
-All notable changes to `llama-index-selectors-nace` and `llama-index-evaluation-nace` are listed here.
-Both packages are released together with the same version number.
+All notable changes to `llama-index-selectors-nace`, `llama-index-evaluation-nace` and
+`llama-index-readers-nace` are listed here. The selectors and evaluation packages are released
+together with the same version number; the reader package has its own.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packages follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [readers 0.1.0] - 2026-11-20
+
+### Added
+
+- `llama-index-readers-nace` 0.1.0: `NaceReader`, a LlamaIndex reader that parses files into
+  `Document` objects with NDI (Nace Document Intelligence).
+
+### Fixed
+
+- Waiting for a parse job and downloading the full text of a truncated result are bounded by
+  `job_timeout`: every poll's HTTP timeout is capped (at most 95 s, or the remaining budget if smaller)
+  and its retry waits (a `Retry-After` header included) are bounded by the time left, a
+  stalled download transfer ends on a finite read timeout instead of hanging, and a result
+  that arrives after the budget is normally refused. The bound is best-effort: a request already
+  in flight, an SDK retry or the cleanup can run slightly past the deadline.
+- The job and file deletions of a cleanup share a short fixed budget (10 s, and a file
+  deletion can be held up to 25 s longer while the SDK waits for Nace to confirm the
+  erasure): a long `Retry-After` on a deletion is refused with a warning instead of being
+  slept, a retry can still reuse the first request's timeout, and a spent budget skips the remaining deletions with a warning.
+- A server that echoes the configured API key back in an error response never has it reach an
+  error message, the stored `body` or `issues`, or a failed job's error.
+- With `chunking_strategy` set, a malformed `chunks` value in a result raises a validation
+  error instead of silently returning one document with the whole text.
 
 ## [0.1.2] - 2026-10-30
 

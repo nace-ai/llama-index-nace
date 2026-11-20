@@ -7,6 +7,7 @@ Set `NACE_API_KEY`, then `make examples` from the repo root runs the scripts.
 | `workflow_branching.py` | Support triage `Workflow`: `NaceSingleSelector` branches, low confidence goes to human review |
 | `router_query_engine.py` | `RouterQueryEngine` with single and multi selectors (MockLLM for answers) |
 | `evaluation.py` | Faithfulness, relevancy and correctness on a good and a bad answer |
+| `reader.py` | `NaceReader` turns a file into documents, whole or per page (not in `make examples`) |
 | `selectors.ipynb` | Selectors tour, including the multi-select limitation |
 | `evaluation.ipynb` | Evaluators tour, including images |
 

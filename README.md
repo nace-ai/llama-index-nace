@@ -17,13 +17,14 @@ LlamaIndex integrations for [Nace](https://nace.ai)'s Drex decision models. Drex
 |---|---|
 | [`llama-index-evaluation-nace`](packages/llama-index-evaluation-nace) | `NaceFaithfulnessEvaluator`, `NaceRelevancyEvaluator`, `NaceCorrectnessEvaluator`: replace your LLM judge |
 | [`llama-index-selectors-nace`](packages/llama-index-selectors-nace) | `NaceSingleSelector`, `NaceMultiSelector` for `RouterQueryEngine` and Workflows |
+| [`llama-index-readers-nace`](packages/llama-index-readers-nace) | `NaceReader`: parse files into `Document` objects with NDI |
 
 Evaluators: Drex gives each judgement as a probability, and Drex Max reads images (charts, screenshots) from `ImageNode` sources. Selectors: every answer is one of your options with a probability, so low confidence can fall back or go to a human.
 
 ## Install
 
 ```
-pip install llama-index-evaluation-nace llama-index-selectors-nace
+pip install llama-index-evaluation-nace llama-index-selectors-nace llama-index-readers-nace
 ```
 
 Each package installs on its own too.
@@ -64,6 +65,18 @@ from llama_index.selectors.nace import NaceSingleSelector
 
 See [`examples/`](examples) for scripts and notebooks (`make examples`).
 
+## Documents (NDI)
+
+`NaceReader` turns a file into Markdown `Document` objects with NDI (Nace Document Intelligence) Parse:
+
+```python
+from llama_index.readers.nace import NaceReader
+
+documents = NaceReader().load_data("report.pdf")
+```
+
+A local file is uploaded, parsed and then deleted from your Nace account; see the [package README](packages/llama-index-readers-nace). NDI is not available through OpenRouter.
+
 ## Benchmark
 
 Measured against LlamaIndex's own `FaithfulnessEvaluator` and `LLMSingleSelector`. Faithfulness uses 500 length-matched HaluEval QA examples
@@ -103,9 +116,10 @@ See the [changelog](https://github.com/nace-ai/llama-index-nace/blob/main/CHANGE
 
 When Drex ships a new default model, update the packages' default by hand:
 
-1. Set `DEFAULT_MODEL` in both `_drex/client.py` copies
-   (`packages/llama-index-selectors-nace/llama_index/selectors/nace/_drex/client.py` and
-   `packages/llama-index-evaluation-nace/llama_index/evaluation/nace/_drex/client.py`).
+1. Set `DEFAULT_MODEL` in all three `_drex/client.py` copies
+   (`packages/llama-index-selectors-nace/llama_index/selectors/nace/_drex/client.py`,
+   `packages/llama-index-evaluation-nace/llama_index/evaluation/nace/_drex/client.py` and
+   `packages/llama-index-readers-nace/llama_index/readers/nace/_drex/client.py`).
    `scripts/check_drex_sync.py` (run in CI) fails unless the copies are identical.
 2. In the same file, check the pinned facts for the new model: `TEXT_ONLY_MODELS`,
    `MAX_IMAGES`, `IMAGE_MODEL`, and `OPENROUTER_DEFAULT_MODEL` (move it once OpenRouter
@@ -117,8 +131,11 @@ When Drex ships a new default model, update the packages' default by hand:
 5. Update the docs that name the default or quote the benchmark: both package READMEs, the
    LlamaIndex page in the Drex docs (https://console.nace.ai/docs), and re-run the notebooks in
    `examples/` so their saved outputs show the new model.
-6. Bump `_version.py` in both packages: each ships its own `_drex/` copy, so a default-model
-   change needs a release of both. The tests read the client name from `__version__`, so the
+6. Bump `_version.py` in every package that ships the changed `_drex/` copy: each ships its own,
+   so a default-model change needs a release of all three. The selectors and evaluation packages
+   are released together with the same version number; the reader package has its own version
+   number and is released separately. The tests read the client name from `__version__`, so the
    bump needs no test change.
-7. Add the release to `CHANGELOG.md` and tag `selectors-vX.Y.Z` and `evaluation-vX.Y.Z`; `.github/workflows/release.yml` checks the
+7. Add the release to `CHANGELOG.md` and tag `selectors-vX.Y.Z`, `evaluation-vX.Y.Z` and, for the
+   reader package, `readers-vX.Y.Z`; `.github/workflows/release.yml` checks the
    tag against `_version.py`, builds and publishes to PyPI.

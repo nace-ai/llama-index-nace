@@ -13,6 +13,7 @@ resolution-markers = [
 members = [
     "llama-index-evaluation-nace",
     "llama-index-nace-workspace",
+    "llama-index-readers-nace",
     "llama-index-selectors-nace",
 ]
 
@@ -2239,6 +2240,7 @@ dev = [
     { name = "ipykernel" },
     { name = "jupyter" },
     { name = "llama-index-evaluation-nace" },
+    { name = "llama-index-readers-nace" },
     { name = "llama-index-selectors-nace" },
     { name = "mypy" },
     { name = "nbconvert" },
@@ -2275,6 +2277,7 @@ dev = [
     { name = "ipykernel", specifier = ">=6.29" },
     { name = "jupyter", specifier = ">=1.1" },
     { name = "llama-index-evaluation-nace", editable = "packages/llama-index-evaluation-nace" },
+    { name = "llama-index-readers-nace", editable = "packages/llama-index-readers-nace" },
     { name = "llama-index-selectors-nace", editable = "packages/llama-index-selectors-nace" },
     { name = "mypy", specifier = ">=1.18" },
     { name = "nbconvert", specifier = ">=7.16" },
@@ -2298,6 +2301,24 @@ test = [
     { name = "pytest", specifier = ">=8.3" },
     { name = "pytest-asyncio", specifier = ">=0.25" },
     { name = "pytest-cov", specifier = ">=6.0" },
+]
+
+[[package]]
+name = "llama-index-readers-nace"
+source = { editable = "packages/llama-index-readers-nace" }
+dependencies = [
+    { name = "httpx" },
+    { name = "llama-index-core" },
+    { name = "nace-sdk" },
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27,<1" },
+    { name = "llama-index-core", specifier = ">=0.14.0,<0.15" },
+    { name = "nace-sdk", specifier = ">=0.9.0,<1.0.0" },
+    { name = "pydantic", specifier = ">=2.11,<3" },
 ]
 
 [[package]]
@@ -2722,16 +2743,16 @@ wheels = [
 
 [[package]]
 name = "nace-sdk"
-version = "0.3.0"
+version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8c/d6/9c1bdc5d2e9a5e64cb0a2f4015ba78591473b06ac22f17b1bcb5dccc945c/nace_sdk-0.3.0.tar.gz", hash = "sha256:22fca2a235610ed98cdffd48b42c02ff80df5a1a4dd1c805c3a09b3388a6774a", size = 80677, upload-time = "2026-10-26T14:43:48.144Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/4a/73d997eea0d2c9b2af8a3936a045a763416a6f34f4309d99a62fdbb46b12/nace_sdk-0.9.0.tar.gz", hash = "sha256:7623af353cef2adc31194ba656b0e1d6da26c0cca1d7edd981355e12578dd2cb", size = 100762, upload-time = "2026-11-16T23:46:48.392Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/62/0e/a181c529c0f182b83ecd39c9f09454303724e06895ebb5f6b9032e52d794/nace_sdk-0.3.0-py3-none-any.whl", hash = "sha256:4eb0f089ee1927e4e78376871a35d285f100c1fc7b5fc1715dfc429123493556", size = 91959, upload-time = "2026-10-26T14:43:46.582Z" },
+    { url = "https://files.pythonhosted.org/packages/ae/48/e85aaebdbbaec5d059a0e61bab85d3e50266bff79a7dbb26fc3a2a38cec5/nace_sdk-0.9.0-py3-none-any.whl", hash = "sha256:87e0e3bd50d62e15def280f7645739e50935800a0ec64a4a2aaa0b6c718793c4", size = 113907, upload-time = "2026-11-16T23:46:46.941Z" },
 ]
 
 [[package]]

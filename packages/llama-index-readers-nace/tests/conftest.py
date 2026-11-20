@@ -1,0 +1,85 @@
+from __future__ import annotations
+
+import asyncio
+import os
+import time
+import types
+from collections.abc import Callable
+from typing import Any
+
+import httpx
+import pytest
+from fakes import FakeNdi
+from llama_index.readers.nace import NaceReader
+from nace_sdk._core import retry
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Skip `live` tests unless NACE_API_KEY_LIVE is set, so the default run stays offline."""
+    if os.environ.get("NACE_API_KEY_LIVE"):
+        return
+    skip = pytest.mark.skip(reason="set NACE_API_KEY_LIVE to run live tests")
+    for item in items:
+        if item.get_closest_marker("live"):
+            item.add_marker(skip)
+
+
+@pytest.fixture(autouse=True)
+def _no_env(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
+    if request.node.get_closest_marker("live"):
+        return  # live tests read their own NACE_*_LIVE variables
+    for name in (
+        "NACE_API_KEY",
+        "NACE_BASE_URL",
+        "NACE_DEFAULT_DECISION_MODEL",
+        "DREX_API_KEY",
+        "DREX_BASE_URL",
+        "DREX_DEFAULT_MODEL",
+        "NACE_VERCEL_PROTECTION_BYPASS",
+        "OPENROUTER_API_KEY",
+        "NACE_CONFIG_PATH",
+        "DREX_CONFIG_PATH",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+
+@pytest.fixture
+def sleeps(monkeypatch: pytest.MonkeyPatch) -> list[float]:
+    """Record retry waits instead of sleeping."""
+    recorded: list[float] = []
+
+    async def fake_sleep(delay: float) -> None:
+        recorded.append(delay)
+
+    # Replace the module references inside the SDK's retry code only, not the
+    # global `time.sleep` / `asyncio.sleep`.
+    fake_time = types.SimpleNamespace(
+        **{k: getattr(time, k) for k in dir(time) if not k.startswith("_")}
+    )
+    fake_time.sleep = recorded.append
+    fake_asyncio = types.SimpleNamespace(
+        **{k: getattr(asyncio, k) for k in dir(asyncio) if not k.startswith("_")}
+    )
+    fake_asyncio.sleep = fake_sleep
+    monkeypatch.setattr(retry, "time", fake_time)
+    monkeypatch.setattr(retry, "asyncio", fake_asyncio)
+    return recorded
+
+
+@pytest.fixture
+def ndi() -> FakeNdi:
+    return FakeNdi()
+
+
+@pytest.fixture
+def make_reader(ndi: FakeNdi) -> Callable[..., NaceReader]:
+    def make(**kwargs: Any) -> NaceReader:
+        options: dict[str, Any] = {
+            "api_key": "nace_sk_test",
+            "base_url": "https://ndi.test",
+            "http_client": httpx.Client(transport=ndi.transport()),
+        }
+        options.update(kwargs)
+        return NaceReader(**options)
+
+    return make
